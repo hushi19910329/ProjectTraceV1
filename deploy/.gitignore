@@ -1,0 +1,5 @@
+minio.exe
+start_minio.bat
+账号密码记录.txt
+data/
+minio.log

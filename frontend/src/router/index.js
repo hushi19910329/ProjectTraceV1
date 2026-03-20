@@ -1,7 +1,11 @@
 import { createRouter, createWebHistory } from "vue-router";
 
 import LoginView from "../views/auth/LoginView.vue";
+import NotificationCenterView from "../views/collaboration/NotificationCenterView.vue";
 import DashboardView from "../views/dashboard/DashboardView.vue";
+import ProjectDetailView from "../views/projects/ProjectDetailView.vue";
+import ProjectListView from "../views/projects/ProjectListView.vue";
+import ProjectTaskListView from "../views/projects/ProjectTaskListView.vue";
 import PlaceholderView from "../views/shared/PlaceholderView.vue";
 import UserManagementView from "../views/system/UserManagementView.vue";
 import PermissionInfoView from "../views/system/PermissionInfoView.vue";
@@ -26,17 +30,39 @@ const routes = [
   },
   {
     path: "/projects",
-    name: "projects",
-    component: PlaceholderView,
-    props: { title: "项目中心", description: "项目模块一级入口已就绪。" },
-    meta: { title: "项目中心", moduleKey: "project" },
+    name: "projects-root",
+    redirect: "/projects/list",
+    meta: { title: "项目管理", moduleKey: "project" },
   },
   {
-    path: "/projects/overview",
-    name: "project-overview",
-    component: PlaceholderView,
-    props: { title: "项目总览", description: "项目总览页预留完成。" },
-    meta: { title: "项目总览", moduleKey: "project" },
+    path: "/projects/list",
+    name: "projects",
+    component: ProjectListView,
+    meta: { title: "📁 项目清单", moduleKey: "project" },
+  },
+  {
+    path: "/projects/tasks",
+    name: "project-task-list",
+    component: ProjectTaskListView,
+    meta: { title: "✅ 任务清单", moduleKey: "project" },
+  },
+  {
+    path: "/projects/followed-projects",
+    name: "project-followed-projects",
+    component: ProjectListView,
+    meta: { title: "⭐ 关注项目", moduleKey: "project" },
+  },
+  {
+    path: "/projects/followed-tasks",
+    name: "project-followed-tasks",
+    component: ProjectTaskListView,
+    meta: { title: "⭐ 关注任务", moduleKey: "project" },
+  },
+  {
+    path: "/projects/:projectId",
+    name: "project-detail",
+    component: ProjectDetailView,
+    meta: { title: "📝 项目详情", moduleKey: "project" },
   },
   {
     path: "/requirements",
@@ -90,8 +116,7 @@ const routes = [
   {
     path: "/collaboration/messages",
     name: "messages",
-    component: PlaceholderView,
-    props: { title: "消息待办", description: "消息待办页预留完成。" },
+    component: NotificationCenterView,
     meta: { title: "消息待办", moduleKey: "collaboration" },
   },
   {
@@ -155,7 +180,7 @@ router.beforeEach(async (to) => {
     const firstAllowed = authStore.allowedModuleKeys[0];
     const fallbackMap = {
       dashboard: "/dashboard",
-      project: "/projects",
+      project: "/projects/list",
       requirement: "/requirements",
       task: "/tasks",
       test: "/quality/tests",

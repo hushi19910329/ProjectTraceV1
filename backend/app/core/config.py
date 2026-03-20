@@ -23,6 +23,7 @@ class Settings(BaseSettings):
 
     sqlite_path: str = str(BASE_DIR / "data" / "projecttrace.db")
     file_store_path: str = str(BASE_DIR / "data" / "document_store.json")
+    upload_dir_path: str = str(BASE_DIR / "data" / "uploads")
 
     redis_host: str = "redis"
     redis_port: int = 6379
@@ -39,6 +40,10 @@ class Settings(BaseSettings):
     @property
     def file_store_dir(self) -> Path:
         return Path(self.file_store_path).resolve().parent
+
+    @property
+    def upload_dir(self) -> Path:
+        return Path(self.upload_dir_path).resolve()
 
     @property
     def redis_uri(self) -> str | None:

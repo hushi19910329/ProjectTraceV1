@@ -1,4 +1,18 @@
 from app.models.rbac import Permission, Role, User, role_permissions, user_roles
+from app.models.project_management import (
+    Notification,
+    OperationLog,
+    Project,
+    ProjectMember,
+    ProjectNode,
+    Task,
+    TaskAttachment,
+    TaskComment,
+    comment_mentions,
+    project_watchers,
+    task_collaborators,
+    task_watchers,
+)
 
 __all__ = [
     "Permission",
@@ -6,4 +20,16 @@ __all__ = [
     "User",
     "role_permissions",
     "user_roles",
+    "Project",
+    "ProjectMember",
+    "ProjectNode",
+    "Task",
+    "TaskComment",
+    "TaskAttachment",
+    "Notification",
+    "OperationLog",
+    "task_collaborators",
+    "task_watchers",
+    "comment_mentions",
+    "project_watchers",
 ]

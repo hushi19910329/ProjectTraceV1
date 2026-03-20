@@ -4,6 +4,7 @@ export const useAppStore = defineStore("app", {
   state: () => ({
     appName: "ProjectTrace",
     menuTree: [],
+    sidebarCollapsed: false,
   }),
   getters: {
     topMenus: (state) => state.menuTree,
@@ -14,6 +15,12 @@ export const useAppStore = defineStore("app", {
     },
     clearMenus() {
       this.menuTree = [];
+    },
+    toggleSidebar() {
+      this.sidebarCollapsed = !this.sidebarCollapsed;
+    },
+    setSidebarCollapsed(value) {
+      this.sidebarCollapsed = Boolean(value);
     },
   },
 });

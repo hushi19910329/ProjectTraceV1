@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import text, select
 from sqlalchemy.orm import Session
 
 from app.db.postgres import Base, engine
@@ -26,6 +26,13 @@ ROLES = [
 
 def init_database() -> None:
     Base.metadata.create_all(bind=engine)
+    try:
+        with engine.begin() as conn:
+            # Lightweight SQLite migration for new columns in development mode.
+            conn.execute(text("ALTER TABLE tasks ADD COLUMN tags VARCHAR(255) DEFAULT ''"))
+    except Exception:
+        # Column may already exist on subsequent startup.
+        pass
 
     with Session(engine) as db:
         existing_permissions = {item.code: item for item in db.scalars(select(Permission)).all()}

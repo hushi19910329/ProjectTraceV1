@@ -10,10 +10,12 @@ MENU_TREE = [
     {
         "key": "project",
         "label": "项目管理",
-        "path": "/projects",
+        "path": "/projects/list",
         "children": [
-            {"key": "project-list", "label": "项目中心", "path": "/projects"},
-            {"key": "project-overview", "label": "项目总览", "path": "/projects/overview"},
+            {"key": "project-list", "label": "项目清单", "path": "/projects/list"},
+            {"key": "project-task-list", "label": "任务清单", "path": "/projects/tasks"},
+            {"key": "project-followed-projects", "label": "关注项目", "path": "/projects/followed-projects"},
+            {"key": "project-followed-tasks", "label": "关注任务", "path": "/projects/followed-tasks"},
         ],
     },
     {

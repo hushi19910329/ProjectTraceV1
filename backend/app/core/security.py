@@ -24,3 +24,12 @@ def get_current_user(
         )
 
     return user
+
+
+def require_superuser(user: dict = Depends(get_current_user)) -> dict:
+    if not user.get("is_superuser"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="仅管理员可以执行该操作",
+        )
+    return user
