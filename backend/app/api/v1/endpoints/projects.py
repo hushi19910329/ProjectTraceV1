@@ -13,6 +13,7 @@ from app.schemas.project_management import (
     ReminderCreate,
     TaskAbandonPayload,
     TaskCreate,
+    TaskStatusUpdateCreate,
     TaskUpdate,
 )
 from app.services.project_service import project_service
@@ -28,6 +29,8 @@ def list_projects(
     owner_id: int | None = Query(default=None),
     tag: str | None = Query(default=None),
     followed: bool | None = Query(default=None),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
     user: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> dict:
@@ -39,8 +42,26 @@ def list_projects(
         "tag": tag,
         "followed": followed,
     }
-    items = [project_service.serialize_project(item) for item in project_service.list_projects_with_filters(db, user, filters)]
-    return {"items": items}
+    page_items, total = project_service.list_projects_with_filters(
+        db,
+        user,
+        filters,
+        page=page,
+        page_size=page_size,
+    )
+    items = [project_service.serialize_project(item) for item in page_items]
+    return {"items": items, "total": total, "page": page, "page_size": page_size}
+
+
+@router.get("/meta/tags")
+def list_project_tags(
+    keyword: str | None = Query(default=None),
+    limit: int = Query(default=20, ge=1, le=200),
+    user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> dict:
+    items, total = project_service.list_project_tags(db, user, keyword=keyword, limit=limit)
+    return {"items": items, "total": total, "has_more": total > len(items)}
 
 
 @router.post("")
@@ -84,6 +105,8 @@ def list_all_tasks(
     assignee_id: int | None = Query(default=None),
     tag: str | None = Query(default=None),
     followed: bool | None = Query(default=None),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=50, ge=1, le=200),
     user: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> dict:
@@ -95,8 +118,15 @@ def list_all_tasks(
         "tag": tag,
         "followed": followed,
     }
-    items = [project_service.serialize_task(item) for item in project_service.list_all_tasks_with_filters(db, user, filters)]
-    return {"items": items}
+    task_items, total = project_service.list_all_tasks_with_filters(
+        db,
+        user,
+        filters,
+        page=page,
+        page_size=page_size,
+    )
+    items = [project_service.serialize_task(item) for item in task_items]
+    return {"items": items, "total": total, "page": page, "page_size": page_size}
 
 
 @router.post("/{project_id}/tasks")
@@ -156,6 +186,18 @@ def add_comment(
         "mentioned_users": [project_service._serialize_user(item) for item in comment.mentioned_users],
         "created_at": comment.created_at.isoformat(),
     }
+
+
+@router.post("/{project_id}/tasks/{task_id}/status-updates")
+def add_task_status_update(
+    project_id: int,
+    task_id: int,
+    payload: TaskStatusUpdateCreate,
+    user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> dict:
+    task = project_service.add_task_status_update(db, project_id, task_id, payload, user)
+    return project_service.serialize_task(task)
 
 
 @router.post("/{project_id}/tasks/{task_id}/attachments")

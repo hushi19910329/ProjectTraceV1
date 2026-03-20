@@ -8,32 +8,41 @@
         </div>
       </div>
 
-      <el-form inline>
-        <el-form-item label="🔍 关键词">
-          <el-input v-model="filters.keyword" placeholder="任务标题/描述" clearable @keyup.enter="loadTasks" />
-        </el-form-item>
-        <el-form-item label="👤 负责人">
-          <el-select v-model="filters.assignee_id" clearable filterable placeholder="全部负责人">
-            <el-option v-for="user in users" :key="user.id" :label="user.real_name" :value="user.id" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="🏷️ 标签">
-          <el-input v-model="filters.tag" placeholder="标签关键词" clearable @keyup.enter="loadTasks" />
-        </el-form-item>
-        <el-form-item label="📌 状态">
-          <el-select v-model="filters.status" clearable placeholder="全部状态">
-            <el-option label="待开始" value="todo" />
-            <el-option label="进行中" value="in_progress" />
-            <el-option label="阻塞" value="blocked" />
-            <el-option label="已完成" value="done" />
-            <el-option label="已废弃" value="abandoned" />
-          </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="loadTasks">筛选</el-button>
-          <el-button @click="resetFilters">重置</el-button>
-        </el-form-item>
-      </el-form>
+      <div class="project-filter-bar">
+        <el-form inline class="project-filter-left">
+          <el-form-item label="🔍 关键词">
+            <el-input v-model="filters.keyword" placeholder="任务标题/描述" clearable @keyup.enter="loadTasks" />
+          </el-form-item>
+          <el-form-item label="👤 负责人">
+            <el-select v-model="filters.assignee_id" clearable filterable placeholder="全部负责人">
+              <el-option v-for="user in users" :key="user.id" :label="user.real_name" :value="user.id">
+                <div class="owner-option">
+                  <el-avatar :size="20" :src="user.avatar_url || ''">
+                    {{ user.real_name?.slice(0, 1) || user.username?.slice(0, 1) }}
+                  </el-avatar>
+                  <span>{{ user.real_name }}</span>
+                </div>
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="🏷️ 标签">
+            <el-input v-model="filters.tag" placeholder="标签关键词" clearable @keyup.enter="loadTasks" />
+          </el-form-item>
+          <el-form-item label="📌 状态">
+            <el-select v-model="filters.status" clearable placeholder="全部状态">
+              <el-option label="待开始" value="todo" />
+              <el-option label="进行中" value="in_progress" />
+              <el-option label="阻塞" value="blocked" />
+              <el-option label="已完成" value="done" />
+              <el-option label="已废弃" value="abandoned" />
+            </el-select>
+          </el-form-item>
+        </el-form>
+        <div class="project-filter-actions">
+          <el-button type="primary" @click="loadTasks">🔎 筛选</el-button>
+          <el-button @click="resetFilters">♻️ 重置</el-button>
+        </div>
+      </div>
     </section>
 
     <section class="card">
@@ -47,11 +56,28 @@
         </el-table-column>
         <el-table-column label="负责人" min-width="110">
           <template #default="{ row }">
-            {{ row.assignee?.real_name || "-" }}
+            <div class="owner-cell">
+              <el-avatar v-if="row.assignee" :size="24" :src="row.assignee.avatar_url || ''">
+                {{ row.assignee.real_name?.slice(0, 1) || row.assignee.username?.slice(0, 1) }}
+              </el-avatar>
+              <span>{{ row.assignee?.real_name || "-" }}</span>
+            </div>
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="110" />
-        <el-table-column prop="priority" label="优先级" width="90" />
+        <el-table-column label="状态" width="130">
+          <template #default="{ row }">
+            <el-tooltip :content="taskStatusMap[row.status]?.desc || row.status" placement="top">
+              <span>{{ taskStatusMap[row.status]?.emoji || "❔" }} {{ taskStatusMap[row.status]?.label || row.status }}</span>
+            </el-tooltip>
+          </template>
+        </el-table-column>
+        <el-table-column label="优先级" width="120">
+          <template #default="{ row }">
+            <el-tooltip :content="priorityMap[row.priority]?.desc || row.priority" placement="top">
+              <span>{{ priorityMap[row.priority]?.emoji || "❔" }} {{ priorityMap[row.priority]?.label || row.priority }}</span>
+            </el-tooltip>
+          </template>
+        </el-table-column>
         <el-table-column label="🏷️ 标签" min-width="180">
           <template #default="{ row }">
             <el-tag v-for="tag in row.tags" :key="tag" class="compact-tag" size="small">{{ tag }}</el-tag>
@@ -78,7 +104,14 @@
         <p class="minor-text">所属项目：{{ activeTask.project_name }}</p>
         <p>{{ activeTask.description || "暂无描述" }}</p>
         <div class="summary-grid">
-          <div class="stat-item"><span class="stat-label">📌 状态</span><strong>{{ activeTask.status }}</strong></div>
+          <div class="stat-item">
+            <span class="stat-label">📌 状态</span>
+            <strong>
+              <el-tooltip :content="taskStatusMap[activeTask.status]?.desc || activeTask.status" placement="top">
+                <span>{{ taskStatusMap[activeTask.status]?.emoji || "❔" }} {{ taskStatusMap[activeTask.status]?.label || activeTask.status }}</span>
+              </el-tooltip>
+            </strong>
+          </div>
           <div class="stat-item"><span class="stat-label">👤 负责人</span><strong>{{ activeTask.assignee?.real_name || "-" }}</strong></div>
           <div class="stat-item"><span class="stat-label">📈 进度</span><strong>{{ activeTask.progress }}%</strong></div>
           <div class="stat-item"><span class="stat-label">🏷️ 标签</span><strong>{{ activeTask.tags?.join(", ") || "-" }}</strong></div>
@@ -118,6 +151,21 @@ const filters = reactive({
 
 const pageTitle = computed(() => (route.path.includes("followed-tasks") ? "⭐ 关注任务" : "✅ 任务清单"));
 
+const taskStatusMap = {
+  todo: { emoji: "⚪", label: "待开始", desc: "任务尚未开始处理" },
+  in_progress: { emoji: "🟡", label: "进行中", desc: "任务正在执行中" },
+  blocked: { emoji: "⛔", label: "阻塞", desc: "任务被依赖或风险阻塞" },
+  done: { emoji: "✅", label: "已完成", desc: "任务已完成并关闭" },
+  abandoned: { emoji: "🗑️", label: "已废弃", desc: "任务被废弃但保留追踪记录" },
+};
+
+const priorityMap = {
+  low: { emoji: "🟢", label: "低", desc: "低优先级，可延后处理" },
+  medium: { emoji: "🔵", label: "中", desc: "常规优先级，按计划推进" },
+  high: { emoji: "🟠", label: "高", desc: "高优先级，需要优先处理" },
+  urgent: { emoji: "🔴", label: "紧急", desc: "紧急优先级，需要立即处理" },
+};
+
 function resetFilters() {
   filters.keyword = "";
   filters.assignee_id = undefined;
@@ -150,8 +198,12 @@ async function toggleTaskFollow(task) {
 }
 
 async function loadUsers() {
-  const { data } = await fetchUsers();
-  users.value = data.items;
+  try {
+    const { data } = await fetchUsers();
+    users.value = data.items;
+  } catch (error) {
+    ElMessage.error(error.response?.data?.detail || "用户列表加载失败");
+  }
 }
 
 async function loadTasks() {
@@ -166,6 +218,8 @@ async function loadTasks() {
     };
     const { data } = await fetchAllTasks(params);
     tasks.value = data.items;
+  } catch (error) {
+    ElMessage.error(error.response?.data?.detail || "任务清单加载失败");
   } finally {
     loading.value = false;
   }
@@ -182,6 +236,6 @@ function goProjectDetail(projectId) {
 }
 
 onMounted(async () => {
-  await Promise.all([loadUsers(), loadTasks()]);
+  await Promise.allSettled([loadUsers(), loadTasks()]);
 });
 </script>

@@ -1,6 +1,6 @@
 <template>
-  <div class="page-grid" v-loading="loading">
-    <section class="card" v-if="project">
+  <div class="page-grid">
+    <section class="card" v-loading="loadingState.project" v-if="project">
       <div class="section-head">
         <div>
           <h2 class="section-title">📝 {{ project.name }}</h2>
@@ -25,7 +25,7 @@
       </div>
     </section>
 
-    <section class="card" v-if="project">
+    <section class="card" v-loading="loadingState.tasks" v-if="project">
       <div class="section-head">
         <div>
           <h2 class="section-title">🧱 任务列表</h2>
@@ -34,7 +34,7 @@
         <el-button type="primary" @click="openCreateTask">➕ 新建任务</el-button>
       </div>
 
-      <el-table :data="tasks" style="width: 100%">
+      <el-table :data="taskTree" row-key="id" :tree-props="{ children: 'children' }" style="width: 100%">
         <el-table-column prop="title" label="标题" min-width="220" />
         <el-table-column label="类型" width="90">
           <template #default="{ row }">
@@ -43,11 +43,28 @@
         </el-table-column>
         <el-table-column label="负责人" min-width="120">
           <template #default="{ row }">
-            {{ row.assignee?.real_name || "-" }}
+            <div class="owner-cell">
+              <el-avatar v-if="row.assignee" :size="24" :src="row.assignee.avatar_url || ''">
+                {{ row.assignee.real_name?.slice(0, 1) || row.assignee.username?.slice(0, 1) }}
+              </el-avatar>
+              <span>{{ row.assignee?.real_name || "-" }}</span>
+            </div>
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="110" />
-        <el-table-column prop="priority" label="优先级" width="100" />
+        <el-table-column label="状态" width="130">
+          <template #default="{ row }">
+            <el-tooltip :content="taskStatusMap[row.status]?.desc || row.status" placement="top">
+              <span>{{ taskStatusMap[row.status]?.emoji || "❔" }} {{ taskStatusMap[row.status]?.label || row.status }}</span>
+            </el-tooltip>
+          </template>
+        </el-table-column>
+        <el-table-column label="优先级" width="120">
+          <template #default="{ row }">
+            <el-tooltip :content="priorityMap[row.priority]?.desc || row.priority" placement="top">
+              <span>{{ priorityMap[row.priority]?.emoji || "❔" }} {{ priorityMap[row.priority]?.label || row.priority }}</span>
+            </el-tooltip>
+          </template>
+        </el-table-column>
         <el-table-column label="🏷️ 标签" min-width="170">
           <template #default="{ row }">
             <el-tag v-for="tag in row.tags" :key="tag" class="compact-tag" size="small">{{ tag }}</el-tag>
@@ -61,6 +78,7 @@
         <el-table-column label="操作" width="240" fixed="right">
           <template #default="{ row }">
             <el-button link type="primary" @click="openTaskDrawer(row.id)">查看</el-button>
+            <el-button link type="success" @click="openCreateSubTask(row)">子任务</el-button>
             <el-button link type="warning" @click="openEditTask(row)">编辑</el-button>
             <el-button link type="danger" :disabled="row.is_abandoned" @click="openAbandonDialog(row)">废弃</el-button>
           </template>
@@ -68,7 +86,7 @@
       </el-table>
     </section>
 
-    <section class="card" v-if="project">
+    <section class="card" v-loading="loadingState.logs" v-if="project">
       <div class="section-head">
         <div>
           <h2 class="section-title">📜 操作日志</h2>
@@ -85,7 +103,7 @@
       <el-empty v-else description="暂无操作日志" />
     </section>
 
-    <el-drawer v-model="taskDrawerVisible" title="🔎 任务详情" direction="rtl" size="700px">
+    <el-drawer v-model="taskDrawerVisible" title="🔎 任务详情" direction="rtl" size="700px" v-loading="loadingState.taskDetail">
       <div v-if="selectedTask" class="drawer-content">
         <div class="section-head">
           <h3>{{ selectedTask.title }}</h3>
@@ -93,9 +111,23 @@
         </div>
 
         <div class="summary-grid">
-          <div class="stat-item"><span class="stat-label">📌 状态</span><strong>{{ selectedTask.status }}</strong></div>
+          <div class="stat-item">
+            <span class="stat-label">📌 状态</span>
+            <strong>
+              <el-tooltip :content="taskStatusMap[selectedTask.status]?.desc || selectedTask.status" placement="top">
+                <span>{{ taskStatusMap[selectedTask.status]?.emoji || "❔" }} {{ taskStatusMap[selectedTask.status]?.label || selectedTask.status }}</span>
+              </el-tooltip>
+            </strong>
+          </div>
           <div class="stat-item"><span class="stat-label">👤 负责人</span><strong>{{ selectedTask.assignee?.real_name || "-" }}</strong></div>
-          <div class="stat-item"><span class="stat-label">⭐ 优先级</span><strong>{{ selectedTask.priority }}</strong></div>
+          <div class="stat-item">
+            <span class="stat-label">⭐ 优先级</span>
+            <strong>
+              <el-tooltip :content="priorityMap[selectedTask.priority]?.desc || selectedTask.priority" placement="top">
+                <span>{{ priorityMap[selectedTask.priority]?.emoji || "❔" }} {{ priorityMap[selectedTask.priority]?.label || selectedTask.priority }}</span>
+              </el-tooltip>
+            </strong>
+          </div>
           <div class="stat-item"><span class="stat-label">📈 进度</span><strong>{{ selectedTask.progress }}%</strong></div>
         </div>
 
@@ -122,12 +154,27 @@
             </el-form-item>
           </div>
           <el-form-item label="完成标准">
-            <el-input v-model="taskUpdateForm.acceptance_criteria" type="textarea" :rows="2" />
+            <el-input v-model="taskUpdateForm.content" type="textarea" :rows="2" placeholder="请填写本次状态更新内容（会保留历史）" />
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="handleUpdateTask">💾 保存</el-button>
           </el-form-item>
         </el-form>
+
+        <section class="inner-panel">
+          <h3>📜 状态更新历史</h3>
+          <div v-if="selectedTask.status_updates?.length" class="comment-list">
+            <div v-for="item in selectedTask.status_updates" :key="item.id" class="comment-item">
+              <div class="comment-head">
+                <strong>{{ item.operator?.real_name || "-" }}</strong>
+                <span class="minor-text">{{ formatDateTime(item.created_at) }}</span>
+              </div>
+              <div class="minor-text">状态: {{ item.status }} | 进度: {{ item.progress }}% | 工时: {{ item.actual_hours }}</div>
+              <div>{{ item.content }}</div>
+            </div>
+          </div>
+          <el-empty v-else description="暂无状态更新记录" />
+        </section>
 
         <section class="inner-panel">
           <h3>💬 评论</h3>
@@ -315,6 +362,7 @@ import { useRoute, useRouter } from "vue-router";
 import {
   abandonProjectTask,
   addTaskComment,
+  addTaskStatusUpdate,
   createProjectTask,
   createTaskReminder,
   downloadAttachment,
@@ -333,9 +381,16 @@ const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
 
-const loading = ref(false);
+const loadingState = reactive({
+  project: false,
+  tasks: false,
+  logs: false,
+  users: false,
+  taskDetail: false,
+});
 const project = ref(null);
 const tasks = ref([]);
+const taskTree = ref([]);
 const logs = ref([]);
 const users = ref([]);
 const selectedTask = ref(null);
@@ -368,7 +423,7 @@ const taskUpdateForm = reactive({
   progress: 0,
   assignee_id: null,
   actual_hours: 0,
-  acceptance_criteria: "",
+  content: "",
 });
 const commentForm = reactive({ content: "", mentioned_user_ids: [] });
 const reminderForm = reactive({ user_ids: [], content: "" });
@@ -387,6 +442,21 @@ const projectEditForm = reactive({
 
 const projectId = computed(() => Number(route.params.projectId));
 
+const taskStatusMap = {
+  todo: { emoji: "⚪", label: "待开始", desc: "任务尚未开始处理" },
+  in_progress: { emoji: "🟡", label: "进行中", desc: "任务正在执行中" },
+  blocked: { emoji: "⛔", label: "阻塞", desc: "任务被依赖或风险阻塞" },
+  done: { emoji: "✅", label: "已完成", desc: "任务已完成并关闭" },
+  abandoned: { emoji: "🗑️", label: "已废弃", desc: "任务被废弃但保留追踪记录" },
+};
+
+const priorityMap = {
+  low: { emoji: "🟢", label: "低", desc: "低优先级，可延后处理" },
+  medium: { emoji: "🔵", label: "中", desc: "常规优先级，按计划推进" },
+  high: { emoji: "🟠", label: "高", desc: "高优先级，需要优先处理" },
+  urgent: { emoji: "🔴", label: "紧急", desc: "紧急优先级，需要立即处理" },
+};
+
 function resetTaskForm() {
   Object.assign(taskForm, defaultTaskForm());
 }
@@ -403,10 +473,14 @@ function openCreateTask() {
   taskDialogVisible.value = true;
 }
 
-function openCreateSubTask() {
+function openCreateSubTask(parentTask = null) {
   editingTaskId.value = null;
   resetTaskForm();
-  taskForm.parent_task_id = selectedTask.value?.id || null;
+  if (parentTask?.id) {
+    taskForm.parent_task_id = parentTask.id;
+  } else {
+    taskForm.parent_task_id = selectedTask.value?.id || null;
+  }
   taskDialogVisible.value = true;
 }
 
@@ -438,48 +512,95 @@ function goBack() {
 }
 
 async function loadProject() {
-  const { data } = await fetchProject(projectId.value);
-  project.value = data;
+  loadingState.project = true;
+  try {
+    const { data } = await fetchProject(projectId.value);
+    project.value = data;
+  } catch (error) {
+    ElMessage.error(error.response?.data?.detail || "项目信息加载失败");
+  } finally {
+    loadingState.project = false;
+  }
 }
 
 async function loadTasks() {
-  const { data } = await fetchProjectTasks(projectId.value);
-  tasks.value = data.items;
+  loadingState.tasks = true;
+  try {
+    const { data } = await fetchProjectTasks(projectId.value);
+    tasks.value = data.items;
+    taskTree.value = buildTaskTree(data.items);
+  } catch (error) {
+    ElMessage.error(error.response?.data?.detail || "任务列表加载失败");
+  } finally {
+    loadingState.tasks = false;
+  }
+}
+
+function buildTaskTree(items) {
+  const map = new Map();
+  for (const raw of items) {
+    map.set(raw.id, { ...raw, children: [] });
+  }
+  const roots = [];
+  for (const task of map.values()) {
+    if (task.parent_task_id && map.has(task.parent_task_id)) {
+      map.get(task.parent_task_id).children.push(task);
+    } else {
+      roots.push(task);
+    }
+  }
+  return roots;
 }
 
 async function loadUsers() {
-  const { data } = await fetchUsers();
-  users.value = data.items;
+  loadingState.users = true;
+  try {
+    const { data } = await fetchUsers();
+    users.value = data.items;
+  } catch (error) {
+    ElMessage.error(error.response?.data?.detail || "用户列表加载失败");
+  } finally {
+    loadingState.users = false;
+  }
 }
 
 async function loadLogs() {
-  const { data } = await fetchProjectLogs(projectId.value);
-  logs.value = data.items;
+  loadingState.logs = true;
+  try {
+    const { data } = await fetchProjectLogs(projectId.value);
+    logs.value = data.items;
+  } catch (error) {
+    ElMessage.error(error.response?.data?.detail || "操作日志加载失败");
+  } finally {
+    loadingState.logs = false;
+  }
 }
 
 async function refreshAll() {
-  loading.value = true;
-  try {
-    await Promise.all([loadProject(), loadTasks(), loadLogs(), loadUsers()]);
-    if (selectedTask.value) {
-      await openTaskDrawer(selectedTask.value.id);
-    }
-  } finally {
-    loading.value = false;
+  await Promise.allSettled([loadProject(), loadTasks(), loadLogs(), loadUsers()]);
+  if (selectedTask.value) {
+    await openTaskDrawer(selectedTask.value.id);
   }
 }
 
 async function openTaskDrawer(taskId) {
-  const { data } = await fetchProjectTask(projectId.value, taskId);
-  selectedTask.value = data;
-  taskDrawerVisible.value = true;
-  Object.assign(taskUpdateForm, {
-    status: data.status,
-    progress: data.progress,
-    assignee_id: data.assignee?.id || null,
-    actual_hours: data.actual_hours,
-    acceptance_criteria: data.acceptance_criteria,
-  });
+  loadingState.taskDetail = true;
+  try {
+    const { data } = await fetchProjectTask(projectId.value, taskId);
+    selectedTask.value = data;
+    taskDrawerVisible.value = true;
+    Object.assign(taskUpdateForm, {
+      status: data.status,
+      progress: data.progress,
+      assignee_id: data.assignee?.id || null,
+      actual_hours: data.actual_hours,
+      content: "",
+    });
+  } catch (error) {
+    ElMessage.error(error.response?.data?.detail || "任务详情加载失败");
+  } finally {
+    loadingState.taskDetail = false;
+  }
 }
 
 function openEditTask(row) {
@@ -541,8 +662,12 @@ async function handleUpdateTask() {
   if (!selectedTask.value) {
     return;
   }
+  if (!taskUpdateForm.content?.trim()) {
+    ElMessage.warning("请先填写本次状态更新说明");
+    return;
+  }
   try {
-    await updateProjectTask(projectId.value, selectedTask.value.id, taskUpdateForm);
+    await addTaskStatusUpdate(projectId.value, selectedTask.value.id, taskUpdateForm);
     ElMessage.success("任务更新成功");
     await refreshAll();
   } catch (error) {

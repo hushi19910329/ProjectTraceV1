@@ -4,7 +4,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from fastapi import HTTPException, UploadFile, status
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.core.config import settings
@@ -18,6 +18,7 @@ from app.models import (
     Task,
     TaskAttachment,
     TaskComment,
+    TaskStatusUpdate,
     User,
 )
 from app.schemas.project_management import (
@@ -27,6 +28,7 @@ from app.schemas.project_management import (
     ReminderCreate,
     TaskAbandonPayload,
     TaskCreate,
+    TaskStatusUpdateCreate,
     TaskUpdate,
 )
 from app.services.user_service import user_service
@@ -41,9 +43,10 @@ class ProjectService:
             "id": user.id,
             "username": user.username,
             "real_name": user.real_name,
+            "avatar_url": user.avatar_url,
         }
 
-    def _project_query(self):
+    def _project_detail_query(self):
         return (
             select(Project)
             .options(
@@ -57,7 +60,18 @@ class ProjectService:
             .order_by(Project.id.desc())
         )
 
-    def _task_query(self):
+    def _project_list_query(self):
+        return (
+            select(Project)
+            .options(
+                joinedload(Project.owner),
+                joinedload(Project.creator),
+                selectinload(Project.tasks),
+            )
+            .order_by(Project.id.desc())
+        )
+
+    def _task_detail_query(self):
         return (
             select(Task)
             .options(
@@ -70,15 +84,27 @@ class ProjectService:
                 selectinload(Task.comments).joinedload(TaskComment.author),
                 selectinload(Task.comments).selectinload(TaskComment.mentioned_users),
                 selectinload(Task.attachments).joinedload(TaskAttachment.uploader),
+                selectinload(Task.status_updates).joinedload(TaskStatusUpdate.operator),
             )
             .order_by(Task.id.desc())
         )
 
-    def list_projects(self, db: Session, current_user: dict) -> list[Project]:
-        return self.list_projects_with_filters(db, current_user, {})
+    def _task_list_query(self):
+        return (
+            select(Task)
+            .options(
+                joinedload(Task.creator),
+                joinedload(Task.assignee),
+                joinedload(Task.project),
+                joinedload(Task.node),
+                selectinload(Task.collaborators),
+                selectinload(Task.watchers),
+                selectinload(Task.status_updates).joinedload(TaskStatusUpdate.operator),
+            )
+            .order_by(Task.id.desc())
+        )
 
-    def list_projects_with_filters(self, db: Session, current_user: dict, filters: dict) -> list[Project]:
-        stmt = self._project_query()
+    def _apply_project_filters(self, stmt, current_user: dict, filters: dict):
         if not current_user.get("is_superuser"):
             stmt = stmt.join(Project.members).where(ProjectMember.user_id == current_user["id"])
         if filters.get("keyword"):
@@ -94,18 +120,70 @@ class ProjectService:
             tag = str(filters["tag"]).strip()
             stmt = stmt.where(Project.tags.ilike(f"%{tag}%"))
         if filters.get("followed"):
-            if current_user.get("is_superuser"):
-                stmt = stmt.join(project_watchers, project_watchers.c.project_id == Project.id).where(
-                    project_watchers.c.user_id == current_user["id"]
-                )
-            else:
-                stmt = stmt.join(project_watchers, project_watchers.c.project_id == Project.id).where(
-                    project_watchers.c.user_id == current_user["id"]
-                )
-        return list(db.scalars(stmt).unique().all())
+            stmt = stmt.join(project_watchers, project_watchers.c.project_id == Project.id).where(
+                project_watchers.c.user_id == current_user["id"]
+            )
+        return stmt
+
+    def list_projects(self, db: Session, current_user: dict) -> list[Project]:
+        items, _ = self.list_projects_with_filters(db, current_user, {}, page=1, page_size=20)
+        return items
+
+    def list_projects_with_filters(
+        self,
+        db: Session,
+        current_user: dict,
+        filters: dict,
+        *,
+        page: int = 1,
+        page_size: int = 20,
+    ) -> tuple[list[Project], int]:
+        base_stmt = self._apply_project_filters(select(Project.id), current_user, filters)
+        total_stmt = select(func.count()).select_from(base_stmt.distinct().subquery())
+        total = db.scalar(total_stmt) or 0
+        if total == 0:
+            return [], 0
+
+        id_page_stmt = (
+            base_stmt.distinct()
+            .order_by(Project.id.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
+        page_ids = list(db.scalars(id_page_stmt).all())
+        if not page_ids:
+            return [], total
+
+        stmt = self._project_list_query().where(Project.id.in_(page_ids))
+        projects = list(db.scalars(stmt).unique().all())
+        order_map = {item_id: idx for idx, item_id in enumerate(page_ids)}
+        projects.sort(key=lambda item: order_map.get(item.id, len(order_map)))
+        return projects, total
+
+    def list_project_tags(
+        self,
+        db: Session,
+        current_user: dict,
+        keyword: str | None = None,
+        limit: int = 20,
+    ) -> tuple[list[str], int]:
+        tag_stmt = self._apply_project_filters(select(Project.tags), current_user, {})
+        raw_tags = db.scalars(tag_stmt).all()
+        tag_set: set[str] = set()
+        for value in raw_tags:
+            for raw in (value or "").split(","):
+                tag = raw.strip()
+                if tag:
+                    tag_set.add(tag)
+        items = sorted(tag_set)
+        if keyword:
+            key = keyword.strip().lower()
+            items = [item for item in items if key in item.lower()]
+        total = len(items)
+        return items[: max(1, limit)], total
 
     def get_project(self, db: Session, project_id: int, current_user: dict) -> Project:
-        stmt = self._project_query().where(Project.id == project_id)
+        stmt = self._project_detail_query().where(Project.id == project_id)
         if not current_user.get("is_superuser"):
             stmt = stmt.join(Project.members).where(ProjectMember.user_id == current_user["id"])
         project = db.scalar(stmt)
@@ -250,11 +328,10 @@ class ProjectService:
     def list_tasks(self, db: Session, project_id: int, current_user: dict) -> list[Task]:
         project = self.get_project(db, project_id, current_user)
         self._ensure_project_member(project, current_user)
-        stmt = self._task_query().where(Task.project_id == project_id)
+        stmt = self._task_detail_query().where(Task.project_id == project_id)
         return list(db.scalars(stmt).unique().all())
 
-    def list_all_tasks_with_filters(self, db: Session, current_user: dict, filters: dict) -> list[Task]:
-        stmt = self._task_query()
+    def _apply_task_filters(self, stmt, current_user: dict, filters: dict):
         if not current_user.get("is_superuser"):
             stmt = stmt.join(ProjectMember, ProjectMember.project_id == Task.project_id).where(
                 ProjectMember.user_id == current_user["id"]
@@ -272,12 +349,43 @@ class ProjectService:
             stmt = stmt.where(Task.tags.ilike(f"%{str(filters['tag']).strip()}%"))
         if filters.get("followed"):
             stmt = stmt.join(Task.watchers).where(User.id == current_user["id"])
-        return list(db.scalars(stmt).unique().all())
+        return stmt
+
+    def list_all_tasks_with_filters(
+        self,
+        db: Session,
+        current_user: dict,
+        filters: dict,
+        *,
+        page: int = 1,
+        page_size: int = 50,
+    ) -> tuple[list[Task], int]:
+        base_stmt = self._apply_task_filters(select(Task.id), current_user, filters)
+        total_stmt = select(func.count()).select_from(base_stmt.distinct().subquery())
+        total = db.scalar(total_stmt) or 0
+        if total == 0:
+            return [], 0
+
+        id_page_stmt = (
+            base_stmt.distinct()
+            .order_by(Task.id.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
+        page_ids = list(db.scalars(id_page_stmt).all())
+        if not page_ids:
+            return [], total
+
+        stmt = self._task_list_query().where(Task.id.in_(page_ids))
+        tasks = list(db.scalars(stmt).unique().all())
+        order_map = {item_id: idx for idx, item_id in enumerate(page_ids)}
+        tasks.sort(key=lambda item: order_map.get(item.id, len(order_map)))
+        return tasks, total
 
     def get_task(self, db: Session, project_id: int, task_id: int, current_user: dict) -> Task:
         project = self.get_project(db, project_id, current_user)
         self._ensure_project_member(project, current_user)
-        task = db.scalar(self._task_query().where(Task.project_id == project_id, Task.id == task_id))
+        task = db.scalar(self._task_detail_query().where(Task.project_id == project_id, Task.id == task_id))
         if not task:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="任务不存在")
         return task
@@ -327,6 +435,15 @@ class ProjectService:
         )
         db.add(task)
         db.flush()
+        self._append_status_update(
+            db,
+            task=task,
+            operator_id=current_user["id"],
+            status=task.status,
+            progress=task.progress,
+            actual_hours=task.actual_hours,
+            content="任务已创建",
+        )
         self._log(db, project_id, current_user["id"], "task_created", f"创建任务 {task.title}", task.id)
         if assignee_id and assignee_id != current_user["id"]:
             self._notify(db, assignee_id, project_id, task.id, "task_assigned", "收到任务分配", f"任务：{task.title}")
@@ -337,6 +454,10 @@ class ProjectService:
         task = self.get_task(db, project_id, task_id, current_user)
         project = task.project
         member_ids = self.get_project_members(project)
+        prev_status = task.status
+        prev_progress = task.progress
+        prev_actual_hours = task.actual_hours
+        status_changed = False
 
         if payload.node_id is not None:
             node = db.scalar(select(ProjectNode).where(ProjectNode.project_id == project_id, ProjectNode.id == payload.node_id))
@@ -353,6 +474,7 @@ class ProjectService:
             task.status = payload.status
             if payload.status == "done":
                 task.progress = 100
+            status_changed = True
         if payload.priority is not None:
             task.priority = payload.priority
         if payload.tags is not None:
@@ -379,12 +501,27 @@ class ProjectService:
             task.estimated_hours = payload.estimated_hours
         if payload.actual_hours is not None:
             task.actual_hours = payload.actual_hours
+            status_changed = True
         if payload.progress is not None:
             task.progress = payload.progress
             if payload.progress == 100 and task.status != "done":
                 task.status = "done"
+            status_changed = True
         if payload.acceptance_criteria is not None:
             task.acceptance_criteria = payload.acceptance_criteria
+
+        if status_changed and (
+            task.status != prev_status or task.progress != prev_progress or task.actual_hours != prev_actual_hours
+        ):
+            self._append_status_update(
+                db,
+                task=task,
+                operator_id=current_user["id"],
+                status=task.status,
+                progress=task.progress,
+                actual_hours=task.actual_hours,
+                content="任务状态已更新",
+            )
 
         self._log(db, project_id, current_user["id"], "task_updated", f"更新任务 {task.title}", task.id)
         db.commit()
@@ -395,7 +532,68 @@ class ProjectService:
         task.is_abandoned = True
         task.status = "abandoned"
         task.abandoned_reason = payload.reason
+        self._append_status_update(
+            db,
+            task=task,
+            operator_id=current_user["id"],
+            status=task.status,
+            progress=task.progress,
+            actual_hours=task.actual_hours,
+            content=f"任务已废弃：{payload.reason}",
+        )
         self._log(db, project_id, current_user["id"], "task_abandoned", f"废弃任务 {task.title}: {payload.reason}", task.id)
+        db.commit()
+        return self.get_task(db, project_id, task.id, current_user)
+
+    def add_task_status_update(
+        self,
+        db: Session,
+        project_id: int,
+        task_id: int,
+        payload: TaskStatusUpdateCreate,
+        current_user: dict,
+    ) -> Task:
+        task = self.get_task(db, project_id, task_id, current_user)
+        member_ids = self.get_project_members(task.project)
+
+        if payload.assignee_id is not None:
+            if payload.assignee_id not in member_ids:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="负责人必须是项目成员")
+            task.assignee_id = payload.assignee_id
+            if payload.assignee_id != current_user["id"]:
+                self._notify(
+                    db,
+                    payload.assignee_id,
+                    project_id,
+                    task.id,
+                    "task_assigned",
+                    "任务负责人已调整",
+                    f"任务：{task.title}",
+                )
+
+        task.status = payload.status
+        task.progress = payload.progress
+        task.actual_hours = payload.actual_hours
+        if task.status == "done":
+            task.progress = 100
+        if task.progress == 100 and task.status != "done":
+            task.status = "done"
+        if task.status == "abandoned":
+            task.is_abandoned = True
+        elif task.is_abandoned:
+            task.is_abandoned = False
+            task.abandoned_reason = ""
+
+        self._append_status_update(
+            db,
+            task=task,
+            operator_id=current_user["id"],
+            status=task.status,
+            progress=task.progress,
+            actual_hours=task.actual_hours,
+            content=payload.content,
+        )
+        self._log(db, project_id, current_user["id"], "task_status_updated", f"更新任务状态 {task.title}", task.id)
         db.commit()
         return self.get_task(db, project_id, task.id, current_user)
 
@@ -719,6 +917,18 @@ class ProjectService:
                 }
                 for comment in task.comments
             ],
+            "status_updates": [
+                {
+                    "id": item.id,
+                    "status": item.status,
+                    "progress": item.progress,
+                    "actual_hours": item.actual_hours,
+                    "content": item.content,
+                    "operator": self._serialize_user(item.operator),
+                    "created_at": item.created_at.isoformat(),
+                }
+                for item in sorted(task.status_updates, key=lambda value: value.id, reverse=True)
+            ],
             "attachments": [
                 {
                     "id": attachment.id,
@@ -734,6 +944,28 @@ class ProjectService:
             "created_at": task.created_at.isoformat(),
             "updated_at": task.updated_at.isoformat(),
         }
+
+    def _append_status_update(
+        self,
+        db: Session,
+        *,
+        task: Task,
+        operator_id: int,
+        status: str,
+        progress: int,
+        actual_hours: int,
+        content: str,
+    ) -> None:
+        db.add(
+            TaskStatusUpdate(
+                task_id=task.id,
+                status=status,
+                progress=progress,
+                actual_hours=actual_hours,
+                content=content,
+                operator_id=operator_id,
+            )
+        )
 
 
 project_service = ProjectService()

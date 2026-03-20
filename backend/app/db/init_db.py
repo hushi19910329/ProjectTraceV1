@@ -28,10 +28,35 @@ def init_database() -> None:
     Base.metadata.create_all(bind=engine)
     try:
         with engine.begin() as conn:
-            # Lightweight SQLite migration for new columns in development mode.
-            conn.execute(text("ALTER TABLE tasks ADD COLUMN tags VARCHAR(255) DEFAULT ''"))
+            # Lightweight migration for new columns in development mode.
+            conn.execute(text("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS tags VARCHAR(255) DEFAULT ''"))
     except Exception:
         # Column may already exist on subsequent startup.
+        pass
+
+    try:
+        with engine.begin() as conn:
+            conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url VARCHAR(500) DEFAULT ''"))
+    except Exception:
+        pass
+
+    try:
+        with engine.begin() as conn:
+            conn.execute(text("CREATE INDEX IF NOT EXISTS idx_projects_status ON projects(status)"))
+            conn.execute(text("CREATE INDEX IF NOT EXISTS idx_projects_priority ON projects(priority)"))
+            conn.execute(text("CREATE INDEX IF NOT EXISTS idx_projects_owner_id ON projects(owner_id)"))
+            conn.execute(text("CREATE INDEX IF NOT EXISTS idx_projects_created_at ON projects(created_at DESC)"))
+            conn.execute(text("CREATE INDEX IF NOT EXISTS idx_tasks_project_id ON tasks(project_id)"))
+            conn.execute(text("CREATE INDEX IF NOT EXISTS idx_tasks_parent_task_id ON tasks(parent_task_id)"))
+            conn.execute(text("CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status)"))
+            conn.execute(text("CREATE INDEX IF NOT EXISTS idx_tasks_priority ON tasks(priority)"))
+            conn.execute(text("CREATE INDEX IF NOT EXISTS idx_tasks_assignee_id ON tasks(assignee_id)"))
+            conn.execute(
+                text("CREATE INDEX IF NOT EXISTS idx_project_members_project_user ON project_members(project_id, user_id)")
+            )
+            conn.execute(text("CREATE INDEX IF NOT EXISTS idx_project_watchers_project_user ON project_watchers(project_id, user_id)"))
+            conn.execute(text("CREATE INDEX IF NOT EXISTS idx_task_watchers_task_user ON task_watchers(task_id, user_id)"))
+    except Exception:
         pass
 
     with Session(engine) as db:
