@@ -5,11 +5,12 @@ class UserBase(BaseModel):
     username: str = Field(min_length=3, max_length=32)
     real_name: str = Field(min_length=1, max_length=32)
     mobile: str = Field(min_length=11, max_length=20)
+    avatar_url: str = ""
     password: str = Field(min_length=1, max_length=128)
     status: str = "active"
     role_ids: list[int] = Field(default_factory=list)
 
-    @field_validator("username", "real_name", "mobile")
+    @field_validator("username", "real_name", "mobile", "avatar_url")
     @classmethod
     def strip_text(cls, value: str) -> str:
         return value.strip()
@@ -22,11 +23,12 @@ class UserCreate(UserBase):
 class UserUpdate(BaseModel):
     real_name: str | None = Field(default=None, min_length=1, max_length=32)
     mobile: str | None = Field(default=None, min_length=11, max_length=20)
+    avatar_url: str | None = None
     password: str | None = Field(default=None, min_length=1, max_length=128)
     status: str | None = None
     role_ids: list[int] | None = None
 
-    @field_validator("real_name", "mobile")
+    @field_validator("real_name", "mobile", "avatar_url")
     @classmethod
     def strip_optional_text(cls, value: str | None) -> str | None:
         return value.strip() if value else value
@@ -37,6 +39,7 @@ class UserResponse(BaseModel):
     username: str
     real_name: str
     mobile: str
+    avatar_url: str
     status: str
     role_ids: list[int]
     roles: list[dict]
@@ -45,3 +48,6 @@ class UserResponse(BaseModel):
 
 class UserListResponse(BaseModel):
     items: list[UserResponse]
+    total: int = 0
+    page: int = 1
+    page_size: int = 20

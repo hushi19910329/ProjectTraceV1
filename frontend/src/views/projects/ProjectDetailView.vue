@@ -84,6 +84,23 @@
           </template>
         </el-table-column>
       </el-table>
+      <div class="table-pagination">
+        <div class="minor-text">
+          已加载 {{ tasks.length }} / {{ taskListState.total }} 条
+        </div>
+        <div class="toolbar-actions">
+          <el-select v-model="taskListState.page_size" style="width: 130px" @change="resetTaskListAndLoad">
+            <el-option :value="20" label="20条/次" />
+            <el-option :value="40" label="40条/次" />
+            <el-option :value="60" label="60条/次" />
+            <el-option :value="80" label="80条/次" />
+            <el-option :value="100" label="100条/次" />
+          </el-select>
+          <el-button type="primary" plain :disabled="!taskListState.has_more" @click="loadMoreTasks">
+            查看更多
+          </el-button>
+        </div>
+      </div>
     </section>
 
     <section class="card" v-loading="loadingState.logs" v-if="project">
@@ -418,6 +435,12 @@ const defaultTaskForm = () => ({
 });
 
 const taskForm = reactive(defaultTaskForm());
+const taskListState = reactive({
+  page: 1,
+  page_size: 20,
+  total: 0,
+  has_more: false,
+});
 const taskUpdateForm = reactive({
   status: "todo",
   progress: 0,
@@ -523,17 +546,40 @@ async function loadProject() {
   }
 }
 
-async function loadTasks() {
+async function loadTasks(append = false) {
   loadingState.tasks = true;
   try {
-    const { data } = await fetchProjectTasks(projectId.value);
-    tasks.value = data.items;
-    taskTree.value = buildTaskTree(data.items);
+    const { data } = await fetchProjectTasks(projectId.value, {
+      page: taskListState.page,
+      page_size: taskListState.page_size,
+    });
+    const pageItems = data.items || [];
+    if (append) {
+      const merged = [...tasks.value, ...pageItems];
+      const map = new Map(merged.map((item) => [item.id, item]));
+      tasks.value = Array.from(map.values());
+    } else {
+      tasks.value = pageItems;
+    }
+    taskListState.total = data.total || 0;
+    taskListState.has_more = Boolean(data.has_more);
+    taskTree.value = buildTaskTree(tasks.value);
   } catch (error) {
     ElMessage.error(error.response?.data?.detail || "任务列表加载失败");
   } finally {
     loadingState.tasks = false;
   }
+}
+
+async function loadMoreTasks() {
+  if (!taskListState.has_more) return;
+  taskListState.page += 1;
+  await loadTasks(true);
+}
+
+async function resetTaskListAndLoad() {
+  taskListState.page = 1;
+  await loadTasks(false);
 }
 
 function buildTaskTree(items) {
@@ -555,7 +601,7 @@ function buildTaskTree(items) {
 async function loadUsers() {
   loadingState.users = true;
   try {
-    const { data } = await fetchUsers();
+    const { data } = await fetchUsers({ page: 1, page_size: 100 });
     users.value = data.items;
   } catch (error) {
     ElMessage.error(error.response?.data?.detail || "用户列表加载失败");
@@ -577,7 +623,8 @@ async function loadLogs() {
 }
 
 async function refreshAll() {
-  await Promise.allSettled([loadProject(), loadTasks(), loadLogs(), loadUsers()]);
+  taskListState.page = 1;
+  await Promise.allSettled([loadProject(), loadTasks(false), loadLogs(), loadUsers()]);
   if (selectedTask.value) {
     await openTaskDrawer(selectedTask.value.id);
   }

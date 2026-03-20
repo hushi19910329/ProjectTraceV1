@@ -325,11 +325,27 @@ class ProjectService:
         if current_user["id"] not in self.get_project_members(project):
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="当前用户不在该项目协作范围内")
 
-    def list_tasks(self, db: Session, project_id: int, current_user: dict) -> list[Task]:
+    def list_tasks(
+        self,
+        db: Session,
+        project_id: int,
+        current_user: dict,
+        *,
+        page: int = 1,
+        page_size: int = 20,
+    ) -> tuple[list[Task], int]:
         project = self.get_project(db, project_id, current_user)
         self._ensure_project_member(project, current_user)
-        stmt = self._task_detail_query().where(Task.project_id == project_id)
-        return list(db.scalars(stmt).unique().all())
+        total = db.scalar(select(func.count()).where(Task.project_id == project_id)) or 0
+        if total == 0:
+            return [], 0
+        stmt = (
+            self._task_list_query()
+            .where(Task.project_id == project_id)
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
+        return list(db.scalars(stmt).unique().all()), total
 
     def _apply_task_filters(self, stmt, current_user: dict, filters: dict):
         if not current_user.get("is_superuser"):

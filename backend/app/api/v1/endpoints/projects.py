@@ -92,9 +92,17 @@ def update_project(
 
 
 @router.get("/{project_id}/tasks")
-def list_tasks(project_id: int, user: dict = Depends(get_current_user), db: Session = Depends(get_db)) -> dict:
-    items = [project_service.serialize_task(item) for item in project_service.list_tasks(db, project_id, user)]
-    return {"items": items}
+def list_tasks(
+    project_id: int,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
+    user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> dict:
+    task_items, total = project_service.list_tasks(db, project_id, user, page=page, page_size=page_size)
+    items = [project_service.serialize_task(item) for item in task_items]
+    has_more = page * page_size < total
+    return {"items": items, "total": total, "page": page, "page_size": page_size, "has_more": has_more}
 
 
 @router.get("/tasks/all")
@@ -106,7 +114,7 @@ def list_all_tasks(
     tag: str | None = Query(default=None),
     followed: bool | None = Query(default=None),
     page: int = Query(default=1, ge=1),
-    page_size: int = Query(default=50, ge=1, le=200),
+    page_size: int = Query(default=20, ge=1, le=100),
     user: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> dict:

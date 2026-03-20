@@ -1,7 +1,7 @@
 import http from "./http";
 
-export function fetchUsers() {
-  return http.get("/users");
+export function fetchUsers(params = {}) {
+  return http.get("/users", { params });
 }
 
 export function createUser(payload) {

@@ -96,6 +96,19 @@
           </template>
         </el-table-column>
       </el-table>
+
+      <div class="table-pagination">
+        <el-pagination
+          background
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="total"
+          v-model:current-page="pageState.page"
+          v-model:page-size="pageState.page_size"
+          :page-sizes="[20, 40, 60, 80, 100]"
+          @size-change="loadTasks"
+          @current-change="loadTasks"
+        />
+      </div>
     </section>
 
     <el-drawer v-model="drawerVisible" title="📝 任务详情" direction="rtl" size="700px">
@@ -139,8 +152,13 @@ const authStore = useAuthStore();
 const loading = ref(false);
 const users = ref([]);
 const tasks = ref([]);
+const total = ref(0);
 const drawerVisible = ref(false);
 const activeTask = ref(null);
+const pageState = reactive({
+  page: 1,
+  page_size: 20,
+});
 
 const filters = reactive({
   keyword: "",
@@ -171,6 +189,7 @@ function resetFilters() {
   filters.assignee_id = undefined;
   filters.tag = "";
   filters.status = "";
+  pageState.page = 1;
   loadTasks();
 }
 
@@ -199,7 +218,7 @@ async function toggleTaskFollow(task) {
 
 async function loadUsers() {
   try {
-    const { data } = await fetchUsers();
+    const { data } = await fetchUsers({ page: 1, page_size: 100 });
     users.value = data.items;
   } catch (error) {
     ElMessage.error(error.response?.data?.detail || "用户列表加载失败");
@@ -215,9 +234,12 @@ async function loadTasks() {
       tag: filters.tag || undefined,
       status: filters.status || undefined,
       followed: route.path.includes("followed-tasks") ? true : undefined,
+      page: pageState.page,
+      page_size: pageState.page_size,
     };
     const { data } = await fetchAllTasks(params);
     tasks.value = data.items;
+    total.value = data.total || 0;
   } catch (error) {
     ElMessage.error(error.response?.data?.detail || "任务清单加载失败");
   } finally {

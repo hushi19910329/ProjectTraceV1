@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -13,8 +13,19 @@ router = APIRouter(prefix="/users")
 
 
 @router.get("", response_model=UserListResponse)
-def list_users(_: dict = Depends(get_current_user), db: Session = Depends(get_db)) -> dict:
-    return {"items": [user_service.serialize_user(item) for item in user_service.list_users(db)]}
+def list_users(
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
+    _: dict = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> dict:
+    items, total = user_service.list_users_paginated(db, page=page, page_size=page_size)
+    return {
+        "items": [user_service.serialize_user(item) for item in items],
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+    }
 
 
 @router.post("", response_model=UserResponse)
@@ -30,6 +41,7 @@ def create_user(payload: UserCreate, _: dict = Depends(get_current_user), db: Se
             username=payload.username,
             real_name=payload.real_name,
             mobile=payload.mobile,
+            avatar_url=payload.avatar_url,
             password_hash=auth_service.hash_password(payload.password),
             status=payload.status,
             is_superuser=False,
@@ -56,6 +68,8 @@ def update_user(user_id: int, payload: UserUpdate, _: dict = Depends(get_current
             user.real_name = payload.real_name
         if payload.mobile is not None:
             user.mobile = payload.mobile
+        if payload.avatar_url is not None:
+            user.avatar_url = payload.avatar_url
         if payload.password:
             user.password_hash = auth_service.hash_password(payload.password)
         if payload.status is not None:
@@ -70,7 +84,7 @@ def update_user(user_id: int, payload: UserUpdate, _: dict = Depends(get_current
         user = user_service.get_user_by_id(db, user_id)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
-    return user
+    return user_service.serialize_user(user)
 
 
 @router.delete("/{user_id}")

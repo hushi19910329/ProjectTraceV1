@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.models import Permission, Role, User
@@ -10,6 +10,20 @@ class UserService:
     def list_users(db: Session) -> list[User]:
         stmt = select(User).options(selectinload(User.roles).selectinload(Role.permissions)).order_by(User.id)
         return list(db.scalars(stmt).all())
+
+    @staticmethod
+    def list_users_paginated(db: Session, *, page: int = 1, page_size: int = 20) -> tuple[list[User], int]:
+        total = db.scalar(select(func.count()).select_from(User)) or 0
+        if total == 0:
+            return [], 0
+        stmt = (
+            select(User)
+            .options(selectinload(User.roles).selectinload(Role.permissions))
+            .order_by(User.id)
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
+        return list(db.scalars(stmt).all()), total
 
     @staticmethod
     def get_user_by_id(db: Session, user_id: int) -> User | None:
@@ -63,6 +77,7 @@ class UserService:
             "username": user.username,
             "real_name": user.real_name,
             "mobile": user.mobile,
+            "avatar_url": user.avatar_url,
             "status": user.status,
             "is_superuser": user.is_superuser,
             "role_ids": [role.id for role in user.roles],
