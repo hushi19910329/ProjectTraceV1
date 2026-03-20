@@ -21,6 +21,12 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 60 * 8
 
+    database_url: str | None = Field(default=None, validation_alias=AliasChoices("DATABASE_URL"))
+    db_host: str = Field(default="127.0.0.1", validation_alias=AliasChoices("DB_HOST", "PG_HOST"))
+    db_port: int = Field(default=5432, validation_alias=AliasChoices("DB_PORT", "PG_PORT"))
+    db_name: str = Field(default="projecttrace", validation_alias=AliasChoices("DB_NAME", "PG_DB"))
+    db_user: str = Field(default="postgres", validation_alias=AliasChoices("DB_USER", "PG_USER"))
+    db_password: str = Field(default="", validation_alias=AliasChoices("DB_PASSWORD", "PG_PASSWORD"))
     sqlite_path: str = str(BASE_DIR / "data" / "projecttrace.db")
     file_store_path: str = str(BASE_DIR / "data" / "document_store.json")
     upload_dir_path: str = str(BASE_DIR / "data" / "uploads")
@@ -31,7 +37,22 @@ class Settings(BaseSettings):
 
     @property
     def sqlalchemy_database_uri(self) -> str:
+        if self.database_url:
+            return self.database_url
+        if self.db_password:
+            return (
+                f"postgresql+psycopg://{self.db_user}:{self.db_password}"
+                f"@{self.db_host}:{self.db_port}/{self.db_name}"
+            )
+        return f"postgresql+psycopg://{self.db_user}@{self.db_host}:{self.db_port}/{self.db_name}"
+
+    @property
+    def fallback_sqlite_database_uri(self) -> str:
         return f"sqlite:///{self.sqlite_path}"
+
+    @property
+    def is_sqlite(self) -> bool:
+        return self.sqlalchemy_database_uri.startswith("sqlite")
 
     @property
     def sqlite_dir(self) -> Path:

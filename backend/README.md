@@ -24,9 +24,11 @@ Recommended working directory is `backend/`, not `backend/app/`, when using `uvi
 
 Current development mode uses:
 
-- SQLite for relational data
+- PostgreSQL for relational data (primary)
 - file-based TinyDB JSON store for document/extension data
 - Redis as optional cache
+
+For automated tests, `pytest` uses an isolated SQLite database to keep tests self-contained.
 
 ## Main endpoints
 

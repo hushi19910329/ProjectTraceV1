@@ -10,12 +10,14 @@ class Base(DeclarativeBase):
     pass
 
 
-Path(settings.sqlite_dir).mkdir(parents=True, exist_ok=True)
+engine_kwargs = {
+    "future": True,
+    "pool_pre_ping": True,
+}
 
-engine = create_engine(
-    settings.sqlalchemy_database_uri,
-    future=True,
-    pool_pre_ping=True,
-    connect_args={"check_same_thread": False},
-)
+if settings.is_sqlite:
+    Path(settings.sqlite_dir).mkdir(parents=True, exist_ok=True)
+    engine_kwargs["connect_args"] = {"check_same_thread": False}
+
+engine = create_engine(settings.sqlalchemy_database_uri, **engine_kwargs)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
