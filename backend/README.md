@@ -20,6 +20,14 @@ python main.py
 
 Recommended working directory is `backend/`, not `backend/app/`, when using `uvicorn`.
 
+## Environment config
+
+1. Copy `backend/.env.example` to `backend/.env`.
+2. Fill your local credentials (especially `DB_PASSWORD`, `PG_PASSWORD`, `JWT_SECRET_KEY`).
+3. Current local PostgreSQL account example:
+   - `DB_USER=postgres`
+   - `DB_PASSWORD=Admin2023!`
+
 ## Development storage
 
 Current development mode uses:

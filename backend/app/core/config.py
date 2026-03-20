@@ -9,7 +9,11 @@ BASE_DIR = Path(__file__).resolve().parents[2]
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=(str(BASE_DIR / ".env"), str(BASE_DIR / ".env.example")),
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
     app_name: str = "ProjectTrace API"
     app_version: str = "0.1.0"
@@ -34,6 +38,19 @@ class Settings(BaseSettings):
     redis_host: str = "redis"
     redis_port: int = 6379
     redis_password: str = ""
+    redis_db: int = 0
+
+    mongo_uri: str = Field(
+        default="mongodb://127.0.0.1:27017",
+        validation_alias=AliasChoices("MONGO_URI"),
+    )
+    mongo_db: str = Field(default="projecttrace", validation_alias=AliasChoices("MONGO_DB"))
+
+    minio_endpoint: str = Field(default="127.0.0.1:9000", validation_alias=AliasChoices("MINIO_ENDPOINT"))
+    minio_access_key: str = Field(default="", validation_alias=AliasChoices("MINIO_ACCESS_KEY"))
+    minio_secret_key: str = Field(default="", validation_alias=AliasChoices("MINIO_SECRET_KEY"))
+    minio_bucket: str = Field(default="projecttrace", validation_alias=AliasChoices("MINIO_BUCKET"))
+    minio_secure: bool = Field(default=False, validation_alias=AliasChoices("MINIO_SECURE"))
 
     @property
     def sqlalchemy_database_uri(self) -> str:
@@ -71,7 +88,7 @@ class Settings(BaseSettings):
         if not self.redis_host:
             return None
         credentials = f":{self.redis_password}@" if self.redis_password else ""
-        return f"redis://{credentials}{self.redis_host}:{self.redis_port}/0"
+        return f"redis://{credentials}{self.redis_host}:{self.redis_port}/{self.redis_db}"
 
 
 @lru_cache
