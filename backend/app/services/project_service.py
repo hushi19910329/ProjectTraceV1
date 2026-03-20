@@ -1,13 +1,9 @@
 from __future__ import annotations
 
-from pathlib import Path
-from uuid import uuid4
-
 from fastapi import HTTPException, UploadFile, status
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
-from app.core.config import settings
 from app.models import (
     Notification,
     OperationLog,
@@ -21,6 +17,7 @@ from app.models import (
     TaskStatusUpdate,
     User,
 )
+from app.services.project import ProjectAttachmentService, ProjectCollaborationService, ProjectSerializerService
 from app.schemas.project_management import (
     CommentCreate,
     ProjectCreate,
@@ -35,16 +32,14 @@ from app.services.user_service import user_service
 
 
 class ProjectService:
+    def __init__(self) -> None:
+        self.serializer = ProjectSerializerService()
+        self.attachment_service = ProjectAttachmentService()
+        self.collaboration_service = ProjectCollaborationService()
+
     @staticmethod
     def _serialize_user(user: User | None) -> dict | None:
-        if not user:
-            return None
-        return {
-            "id": user.id,
-            "username": user.username,
-            "real_name": user.real_name,
-            "avatar_url": user.avatar_url,
-        }
+        return ProjectSerializerService.serialize_user(user)
 
     def _project_detail_query(self):
         return (
@@ -105,7 +100,10 @@ class ProjectService:
         )
 
     def _apply_project_filters(self, stmt, current_user: dict, filters: dict):
-        if not current_user.get("is_superuser"):
+        scope = str(filters.get("scope") or "my")
+        if scope == "my":
+            stmt = stmt.join(Project.members).where(ProjectMember.user_id == current_user["id"])
+        elif not current_user.get("is_superuser"):
             stmt = stmt.join(Project.members).where(ProjectMember.user_id == current_user["id"])
         if filters.get("keyword"):
             keyword = f"%{filters['keyword'].strip()}%"
@@ -114,6 +112,10 @@ class ProjectService:
             stmt = stmt.where(Project.status == filters["status"])
         if filters.get("priority"):
             stmt = stmt.where(Project.priority == filters["priority"])
+        if filters.get("project_type"):
+            stmt = stmt.where(Project.project_type == str(filters["project_type"]))
+        if filters.get("exclude_personal"):
+            stmt = stmt.where(Project.project_type != "personal")
         if filters.get("owner_id"):
             stmt = stmt.where(Project.owner_id == int(filters["owner_id"]))
         if filters.get("tag"):
@@ -166,8 +168,9 @@ class ProjectService:
         current_user: dict,
         keyword: str | None = None,
         limit: int = 20,
+        scope: str = "my",
     ) -> tuple[list[str], int]:
-        tag_stmt = self._apply_project_filters(select(Project.tags), current_user, {})
+        tag_stmt = self._apply_project_filters(select(Project.tags), current_user, {"scope": scope})
         raw_tags = db.scalars(tag_stmt).all()
         tag_set: set[str] = set()
         for value in raw_tags:
@@ -219,6 +222,7 @@ class ProjectService:
             description=payload.description,
             status=payload.status,
             priority=payload.priority,
+            project_type=payload.project_type or "work",
             owner_id=payload.owner_id,
             created_by_id=current_user["id"],
             start_date=payload.start_date,
@@ -286,6 +290,8 @@ class ProjectService:
             project.status = payload.status
         if payload.priority is not None:
             project.priority = payload.priority
+        if payload.project_type is not None:
+            project.project_type = payload.project_type
         if payload.start_date is not None:
             project.start_date = payload.start_date
         if payload.end_date is not None:
@@ -348,7 +354,13 @@ class ProjectService:
         return list(db.scalars(stmt).unique().all()), total
 
     def _apply_task_filters(self, stmt, current_user: dict, filters: dict):
-        if not current_user.get("is_superuser"):
+        project_joined = False
+        scope = str(filters.get("scope") or "my")
+        if scope == "my":
+            stmt = stmt.join(ProjectMember, ProjectMember.project_id == Task.project_id).where(
+                ProjectMember.user_id == current_user["id"]
+            )
+        elif not current_user.get("is_superuser"):
             stmt = stmt.join(ProjectMember, ProjectMember.project_id == Task.project_id).where(
                 ProjectMember.user_id == current_user["id"]
             )
@@ -363,6 +375,14 @@ class ProjectService:
             stmt = stmt.where(Task.assignee_id == int(filters["assignee_id"]))
         if filters.get("tag"):
             stmt = stmt.where(Task.tags.ilike(f"%{str(filters['tag']).strip()}%"))
+        if filters.get("project_status"):
+            stmt = stmt.join(Project, Project.id == Task.project_id).where(Project.status == filters["project_status"])
+            project_joined = True
+        if filters.get("exclude_personal"):
+            if not project_joined:
+                stmt = stmt.join(Project, Project.id == Task.project_id)
+                project_joined = True
+            stmt = stmt.where(Project.project_type != "personal")
         if filters.get("followed"):
             stmt = stmt.join(Task.watchers).where(User.id == current_user["id"])
         return stmt
@@ -842,6 +862,62 @@ class ProjectService:
             )
         )
 
+    # Split-out delegates (transition phase)
+    def serialize_project(self, project: Project) -> dict:
+        return self.serializer.serialize_project(project)
+
+    def _build_task_summary(self, tasks: list[Task]) -> dict:
+        return self.serializer.build_task_summary(tasks)
+
+    def serialize_task(self, task: Task) -> dict:
+        return self.serializer.serialize_task(task)
+
+    def upload_attachment(
+        self,
+        db: Session,
+        project_id: int,
+        task_id: int | None,
+        upload_file: UploadFile,
+        current_user: dict,
+    ) -> TaskAttachment:
+        return self.attachment_service.upload_attachment(self, db, project_id, task_id, upload_file, current_user)
+
+    def get_attachment(self, db: Session, project_id: int, attachment_id: int, current_user: dict) -> TaskAttachment:
+        return self.attachment_service.get_attachment(self, db, project_id, attachment_id, current_user)
+
+    def increase_attachment_download(self, db: Session, attachment: TaskAttachment, current_user: dict) -> None:
+        self.attachment_service.increase_attachment_download(self, db, attachment, current_user)
+
+    def add_comment(self, db: Session, project_id: int, task_id: int, payload: CommentCreate, current_user: dict) -> TaskComment:
+        return self.collaboration_service.add_comment(self, db, project_id, task_id, payload, current_user)
+
+    def list_notifications(self, db: Session, current_user: dict) -> list[Notification]:
+        return self.collaboration_service.list_notifications(db, current_user)
+
+    def mark_notification_read(self, db: Session, notification_id: int, current_user: dict) -> Notification:
+        return self.collaboration_service.mark_notification_read(db, notification_id, current_user)
+
+    def mark_all_notifications_read(self, db: Session, current_user: dict) -> int:
+        return self.collaboration_service.mark_all_notifications_read(db, current_user)
+
+    def follow_project(self, db: Session, project_id: int, current_user: dict) -> None:
+        self.collaboration_service.follow_project(self, db, project_id, current_user)
+
+    def unfollow_project(self, db: Session, project_id: int, current_user: dict) -> None:
+        self.collaboration_service.unfollow_project(self, db, project_id, current_user)
+
+    def follow_task(self, db: Session, project_id: int, task_id: int, current_user: dict) -> None:
+        self.collaboration_service.follow_task(self, db, project_id, task_id, current_user)
+
+    def unfollow_task(self, db: Session, project_id: int, task_id: int, current_user: dict) -> None:
+        self.collaboration_service.unfollow_task(self, db, project_id, task_id, current_user)
+
+    def create_reminder(self, db: Session, project_id: int, task_id: int, payload: ReminderCreate, current_user: dict) -> None:
+        self.collaboration_service.create_reminder(self, db, project_id, task_id, payload, current_user)
+
+    def list_logs(self, db: Session, project_id: int, current_user: dict) -> list[OperationLog]:
+        return self.collaboration_service.list_logs(self, db, project_id, current_user)
+
     def serialize_project(self, project: Project) -> dict:
         return {
             "id": project.id,
@@ -985,3 +1061,122 @@ class ProjectService:
 
 
 project_service = ProjectService()
+
+
+def _delegated_serialize_project(self: ProjectService, project: Project) -> dict:
+    return self.serializer.serialize_project(project)
+
+
+def _delegated_build_task_summary(self: ProjectService, tasks: list[Task]) -> dict:
+    return self.serializer.build_task_summary(tasks)
+
+
+def _delegated_serialize_task(self: ProjectService, task: Task) -> dict:
+    return self.serializer.serialize_task(task)
+
+
+def _delegated_upload_attachment(
+    self: ProjectService,
+    db: Session,
+    project_id: int,
+    task_id: int | None,
+    upload_file: UploadFile,
+    current_user: dict,
+) -> TaskAttachment:
+    return self.attachment_service.upload_attachment(self, db, project_id, task_id, upload_file, current_user)
+
+
+def _delegated_get_attachment(
+    self: ProjectService,
+    db: Session,
+    project_id: int,
+    attachment_id: int,
+    current_user: dict,
+) -> TaskAttachment:
+    return self.attachment_service.get_attachment(self, db, project_id, attachment_id, current_user)
+
+
+def _delegated_increase_attachment_download(
+    self: ProjectService,
+    db: Session,
+    attachment: TaskAttachment,
+    current_user: dict,
+) -> None:
+    self.attachment_service.increase_attachment_download(self, db, attachment, current_user)
+
+
+def _delegated_add_comment(
+    self: ProjectService,
+    db: Session,
+    project_id: int,
+    task_id: int,
+    payload: CommentCreate,
+    current_user: dict,
+) -> TaskComment:
+    return self.collaboration_service.add_comment(self, db, project_id, task_id, payload, current_user)
+
+
+def _delegated_list_notifications(self: ProjectService, db: Session, current_user: dict) -> list[Notification]:
+    return self.collaboration_service.list_notifications(db, current_user)
+
+
+def _delegated_mark_notification_read(
+    self: ProjectService,
+    db: Session,
+    notification_id: int,
+    current_user: dict,
+) -> Notification:
+    return self.collaboration_service.mark_notification_read(db, notification_id, current_user)
+
+
+def _delegated_mark_all_notifications_read(self: ProjectService, db: Session, current_user: dict) -> int:
+    return self.collaboration_service.mark_all_notifications_read(db, current_user)
+
+
+def _delegated_follow_project(self: ProjectService, db: Session, project_id: int, current_user: dict) -> None:
+    self.collaboration_service.follow_project(self, db, project_id, current_user)
+
+
+def _delegated_unfollow_project(self: ProjectService, db: Session, project_id: int, current_user: dict) -> None:
+    self.collaboration_service.unfollow_project(self, db, project_id, current_user)
+
+
+def _delegated_follow_task(self: ProjectService, db: Session, project_id: int, task_id: int, current_user: dict) -> None:
+    self.collaboration_service.follow_task(self, db, project_id, task_id, current_user)
+
+
+def _delegated_unfollow_task(self: ProjectService, db: Session, project_id: int, task_id: int, current_user: dict) -> None:
+    self.collaboration_service.unfollow_task(self, db, project_id, task_id, current_user)
+
+
+def _delegated_create_reminder(
+    self: ProjectService,
+    db: Session,
+    project_id: int,
+    task_id: int,
+    payload: ReminderCreate,
+    current_user: dict,
+) -> None:
+    self.collaboration_service.create_reminder(self, db, project_id, task_id, payload, current_user)
+
+
+def _delegated_list_logs(self: ProjectService, db: Session, project_id: int, current_user: dict) -> list[OperationLog]:
+    return self.collaboration_service.list_logs(self, db, project_id, current_user)
+
+
+ProjectService.serialize_project = _delegated_serialize_project
+ProjectService._build_task_summary = _delegated_build_task_summary
+ProjectService.serialize_task = _delegated_serialize_task
+ProjectService.upload_attachment = _delegated_upload_attachment
+ProjectService.get_attachment = _delegated_get_attachment
+ProjectService.increase_attachment_download = _delegated_increase_attachment_download
+ProjectService.add_comment = _delegated_add_comment
+ProjectService.list_notifications = _delegated_list_notifications
+ProjectService.mark_notification_read = _delegated_mark_notification_read
+ProjectService.mark_all_notifications_read = _delegated_mark_all_notifications_read
+ProjectService.follow_project = _delegated_follow_project
+ProjectService.unfollow_project = _delegated_unfollow_project
+ProjectService.follow_task = _delegated_follow_task
+ProjectService.unfollow_task = _delegated_unfollow_task
+ProjectService.create_reminder = _delegated_create_reminder
+ProjectService.list_logs = _delegated_list_logs

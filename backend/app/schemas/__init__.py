@@ -7,6 +7,7 @@ from app.schemas.project_management import (
     ReminderCreate,
     TaskAbandonPayload,
     TaskCreate,
+    TaskStatusUpdateCreate,
     TaskUpdate,
 )
 from app.schemas.user import UserCreate, UserListResponse, UserResponse, UserUpdate
@@ -18,6 +19,7 @@ __all__ = [
     "ProjectNodeCreate",
     "ProjectUpdate",
     "TaskCreate",
+    "TaskStatusUpdateCreate",
     "TaskUpdate",
     "TaskAbandonPayload",
     "CommentCreate",

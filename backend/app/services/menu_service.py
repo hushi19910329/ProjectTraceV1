@@ -13,6 +13,7 @@ MENU_TREE = [
         "path": "/projects/list",
         "children": [
             {"key": "project-list", "label": "项目清单", "path": "/projects/list"},
+            {"key": "project-company-list", "label": "公司项目", "path": "/projects/company-projects"},
             {"key": "project-task-list", "label": "任务清单", "path": "/projects/tasks"},
             {"key": "project-followed-projects", "label": "关注项目", "path": "/projects/followed-projects"},
             {"key": "project-followed-tasks", "label": "关注任务", "path": "/projects/followed-tasks"},

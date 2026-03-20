@@ -42,3 +42,12 @@ For automated tests, `pytest` uses an isolated SQLite database to keep tests sel
 
 - `GET /api/v1/health`
 - `GET /api/v1/meta/modules`
+- `POST /api/v1/projects/{project_id}/tasks/{task_id}/status-updates` (append task/subtask status update history)
+
+## Seed demo data
+
+```bash
+python scripts/seed_demo_data.py --reset
+```
+
+This seeds demo projects, tasks (including subtasks), comments, mentions, notifications, and operation logs.

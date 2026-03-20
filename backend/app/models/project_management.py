@@ -47,6 +47,7 @@ class Project(Base):
     description: Mapped[str] = mapped_column(Text, default="", nullable=False)
     status: Mapped[str] = mapped_column(String(32), default="not_started", nullable=False)
     priority: Mapped[str] = mapped_column(String(16), default="medium", nullable=False)
+    project_type: Mapped[str] = mapped_column(String(16), default="work", nullable=False, index=True)
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     created_by_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     start_date: Mapped[str | None] = mapped_column(String(10), nullable=True)
@@ -147,6 +148,7 @@ class Task(Base):
     comments: Mapped[list["TaskComment"]] = relationship(back_populates="task", cascade="all, delete-orphan")
     attachments: Mapped[list["TaskAttachment"]] = relationship(back_populates="task", cascade="all, delete-orphan")
     logs: Mapped[list["OperationLog"]] = relationship(back_populates="task", cascade="all, delete-orphan")
+    status_updates: Mapped[list["TaskStatusUpdate"]] = relationship(back_populates="task", cascade="all, delete-orphan")
 
 
 class TaskComment(Base):
@@ -167,6 +169,22 @@ class TaskComment(Base):
     task = relationship("Task", back_populates="comments")
     author = relationship("User")
     mentioned_users = relationship("User", secondary=comment_mentions)
+
+
+class TaskStatusUpdate(Base):
+    __tablename__ = "task_status_updates"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    task_id: Mapped[int] = mapped_column(ForeignKey("tasks.id", ondelete="CASCADE"), nullable=False, index=True)
+    status: Mapped[str] = mapped_column(String(32), nullable=False)
+    progress: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    actual_hours: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    content: Mapped[str] = mapped_column(Text, default="", nullable=False)
+    operator_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    task = relationship("Task", back_populates="status_updates")
+    operator = relationship("User")
 
 
 class TaskAttachment(Base):

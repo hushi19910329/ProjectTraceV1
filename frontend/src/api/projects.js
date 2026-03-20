@@ -4,6 +4,10 @@ export function fetchProjects(params = {}) {
   return http.get("/projects", { params });
 }
 
+export function fetchProjectTags(params = {}) {
+  return http.get("/projects/meta/tags", { params });
+}
+
 export function createProject(payload) {
   return http.post("/projects", payload);
 }
@@ -38,6 +42,10 @@ export function abandonProjectTask(projectId, taskId, payload) {
 
 export function addTaskComment(projectId, taskId, payload) {
   return http.post(`/projects/${projectId}/tasks/${taskId}/comments`, payload);
+}
+
+export function addTaskStatusUpdate(projectId, taskId, payload) {
+  return http.post(`/projects/${projectId}/tasks/${taskId}/status-updates`, payload);
 }
 
 export function uploadTaskAttachment(projectId, taskId, file) {

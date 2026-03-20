@@ -1,6 +1,8 @@
 <template>
   <aside class="global-sidebar" :class="{ collapsed: sidebarCollapsed }">
-    <div class="global-logo">ProjectTrace</div>
+    <div class="global-logo">
+      <img :src="logoUrl" alt="ProjectTrace Logo" class="global-logo-image" />
+    </div>
     <nav class="global-menu">
       <div v-for="menu in topMenus" :key="menu.key" class="global-menu-block">
         <button
@@ -32,6 +34,7 @@ import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
 
 import { useAppStore } from "../../stores/app";
+import logoUrl from "../../assets/logo.png";
 
 const route = useRoute();
 const router = useRouter();

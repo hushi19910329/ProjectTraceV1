@@ -30,6 +30,7 @@ def init_database() -> None:
         with engine.begin() as conn:
             # Lightweight migration for new columns in development mode.
             conn.execute(text("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS tags VARCHAR(255) DEFAULT ''"))
+            conn.execute(text("ALTER TABLE projects ADD COLUMN IF NOT EXISTS project_type VARCHAR(16) DEFAULT 'work'"))
     except Exception:
         # Column may already exist on subsequent startup.
         pass
@@ -44,6 +45,7 @@ def init_database() -> None:
         with engine.begin() as conn:
             conn.execute(text("CREATE INDEX IF NOT EXISTS idx_projects_status ON projects(status)"))
             conn.execute(text("CREATE INDEX IF NOT EXISTS idx_projects_priority ON projects(priority)"))
+            conn.execute(text("CREATE INDEX IF NOT EXISTS idx_projects_project_type ON projects(project_type)"))
             conn.execute(text("CREATE INDEX IF NOT EXISTS idx_projects_owner_id ON projects(owner_id)"))
             conn.execute(text("CREATE INDEX IF NOT EXISTS idx_projects_created_at ON projects(created_at DESC)"))
             conn.execute(text("CREATE INDEX IF NOT EXISTS idx_tasks_project_id ON tasks(project_id)"))

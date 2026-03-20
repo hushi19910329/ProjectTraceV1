@@ -35,6 +35,7 @@
       </div>
 
       <el-table :data="taskTree" row-key="id" :tree-props="{ children: 'children' }" style="width: 100%">
+        <el-table-column label="序号" width="80" type="index" :index="detailTaskIndexMethod" />
         <el-table-column prop="title" label="标题" min-width="220" />
         <el-table-column label="类型" width="90">
           <template #default="{ row }">
@@ -509,6 +510,10 @@ function openCreateSubTask(parentTask = null) {
 
 function formatDateTime(value) {
   return value ? value.replace("T", " ").slice(0, 16) : "-";
+}
+
+function detailTaskIndexMethod(index) {
+  return index + 1;
 }
 
 function openProjectEditDialog() {

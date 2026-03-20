@@ -30,7 +30,7 @@ a {
 .global-sidebar {
   background: #f2f3f5;
   border-right: 1px solid #ebeef5;
-  padding: 14px 10px;
+  padding: 0;
   position: sticky;
   top: 0;
   height: 100vh;
@@ -38,24 +38,40 @@ a {
 }
 
 .global-sidebar.collapsed {
-  padding: 14px 6px;
+  padding: 0;
 }
 
 .global-logo {
-  font-size: 18px;
-  font-weight: 700;
-  color: #303133;
-  margin: 8px 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.global-logo-image {
+  width: 200px;
+  height: 60px;
+  object-fit: contain;
+}
+
+.global-sidebar.collapsed .global-logo-image {
+  width: 200px;
+  height: 60px;
+  object-fit: cover;
+  object-position: center center;
 }
 
 .global-sidebar.collapsed .global-logo {
-  font-size: 14px;
+  justify-content: center;
   margin: 6px 2px 10px;
 }
 
 .global-menu {
   display: grid;
   gap: 6px;
+  padding: 14px 10px;
 }
 
 .global-menu-block {
@@ -186,6 +202,27 @@ a {
   font-size: 14px;
 }
 
+.help-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.help-section {
+  margin-bottom: 12px;
+}
+
+.help-section h4 {
+  margin: 0 0 6px;
+  font-size: 14px;
+  color: #303133;
+}
+
+.help-section p {
+  margin: 4px 0;
+  color: #606266;
+  font-size: 13px;
+}
+
 .user-avatar-icon {
   display: inline-flex;
   align-items: center;
@@ -225,12 +262,18 @@ a {
   background: #f9fafc;
   border-radius: 8px;
   padding: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .stat-label {
   display: block;
   margin-bottom: 8px;
   color: #909399;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .section-head {
@@ -247,15 +290,81 @@ a {
   font-size: 20px;
 }
 
+.section-head > div:first-child {
+  position: relative;
+}
+
 .section-subtitle {
-  margin: 6px 0 0;
-  color: #909399;
+  position: absolute;
+  left: 0;
+  top: calc(100% + 6px);
+  margin: 0;
+  padding: 6px 10px;
+  max-width: 520px;
+  color: #606266;
+  background: #ffffff;
+  border: 1px solid #dcdfe6;
+  border-radius: 6px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: normal;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.section-head > div:first-child:hover .section-subtitle,
+.section-head > div:first-child:focus-within .section-subtitle {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+@media (hover: none) {
+  .section-subtitle {
+    position: static;
+    margin: 6px 0 0;
+    padding: 0;
+    max-width: none;
+    color: #909399;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    font-size: 13px;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    pointer-events: auto;
+  }
 }
 
 .summary-grid {
   display: grid;
   gap: 8px;
   grid-template-columns: repeat(4, 1fr);
+}
+
+.summary-grid .stat-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.summary-grid .stat-label {
+  display: inline;
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.summary-grid .stat-item strong {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .detail-grid {
@@ -322,6 +431,76 @@ a {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.project-filter-bar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.project-filter-left {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-wrap: wrap;
+}
+
+.project-filter-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.owner-option,
+.owner-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.project-table-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.project-table-wrap {
+  height: calc(100vh - 320px);
+  min-height: 320px;
+}
+
+.project-table-wrap .el-scrollbar__bar.is-horizontal {
+  height: 8px !important;
+}
+
+.project-table-wrap .el-scrollbar__bar.is-horizontal .el-scrollbar__thumb {
+  min-height: 8px;
+}
+
+.table-pagination {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.tag-quick-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.tag-filter-chip {
+  cursor: pointer;
+}
+
+.project-expand-panel {
+  padding: 8px;
 }
 
 .primary-btn {

@@ -37,6 +37,17 @@
               <el-option label="已废弃" value="abandoned" />
             </el-select>
           </el-form-item>
+          <el-form-item label="📁 项目状态">
+            <el-select v-model="filters.project_status" clearable placeholder="默认进行中">
+              <el-option label="进行中" value="in_progress" />
+              <el-option label="未开始" value="not_started" />
+              <el-option label="已暂停" value="paused" />
+              <el-option label="已完成" value="done" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="🙈 排除个人">
+            <el-switch v-model="filters.exclude_personal" />
+          </el-form-item>
         </el-form>
         <div class="project-filter-actions">
           <el-button type="primary" @click="loadTasks">🔎 筛选</el-button>
@@ -47,6 +58,7 @@
 
     <section class="card">
       <el-table :data="tasks" v-loading="loading" style="width: 100%">
+        <el-table-column label="序号" width="80" type="index" :index="taskIndexMethod" />
         <el-table-column prop="project_name" label="项目" min-width="140" />
         <el-table-column prop="title" label="任务标题" min-width="200" />
         <el-table-column label="子任务" width="90">
@@ -165,6 +177,8 @@ const filters = reactive({
   assignee_id: undefined,
   tag: "",
   status: "",
+  project_status: "in_progress",
+  exclude_personal: false,
 });
 
 const pageTitle = computed(() => (route.path.includes("followed-tasks") ? "⭐ 关注任务" : "✅ 任务清单"));
@@ -189,8 +203,14 @@ function resetFilters() {
   filters.assignee_id = undefined;
   filters.tag = "";
   filters.status = "";
+  filters.project_status = "in_progress";
+  filters.exclude_personal = false;
   pageState.page = 1;
   loadTasks();
+}
+
+function taskIndexMethod(index) {
+  return (pageState.page - 1) * pageState.page_size + index + 1;
 }
 
 function isTaskFollowed(task) {
@@ -233,7 +253,10 @@ async function loadTasks() {
       assignee_id: filters.assignee_id || undefined,
       tag: filters.tag || undefined,
       status: filters.status || undefined,
+      project_status: filters.project_status || undefined,
+      exclude_personal: filters.exclude_personal ? true : undefined,
       followed: route.path.includes("followed-tasks") ? true : undefined,
+      scope: "my",
       page: pageState.page,
       page_size: pageState.page_size,
     };

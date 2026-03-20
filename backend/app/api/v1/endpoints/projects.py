@@ -29,6 +29,9 @@ def list_projects(
     owner_id: int | None = Query(default=None),
     tag: str | None = Query(default=None),
     followed: bool | None = Query(default=None),
+    project_type: str | None = Query(default=None),
+    exclude_personal: bool = Query(default=False),
+    scope: str = Query(default="my", pattern="^(my|company)$"),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
     user: dict = Depends(get_current_user),
@@ -41,6 +44,9 @@ def list_projects(
         "owner_id": owner_id,
         "tag": tag,
         "followed": followed,
+        "project_type": project_type,
+        "exclude_personal": exclude_personal,
+        "scope": scope,
     }
     page_items, total = project_service.list_projects_with_filters(
         db,
@@ -57,17 +63,18 @@ def list_projects(
 def list_project_tags(
     keyword: str | None = Query(default=None),
     limit: int = Query(default=20, ge=1, le=200),
+    scope: str = Query(default="my", pattern="^(my|company)$"),
     user: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> dict:
-    items, total = project_service.list_project_tags(db, user, keyword=keyword, limit=limit)
+    items, total = project_service.list_project_tags(db, user, keyword=keyword, limit=limit if limit <= 200 else 200, scope=scope)
     return {"items": items, "total": total, "has_more": total > len(items)}
 
 
 @router.post("")
 def create_project(
     payload: ProjectCreate,
-    user: dict = Depends(require_superuser),
+    user: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> dict:
     project = project_service.create_project(db, payload, user)
@@ -113,6 +120,9 @@ def list_all_tasks(
     assignee_id: int | None = Query(default=None),
     tag: str | None = Query(default=None),
     followed: bool | None = Query(default=None),
+    project_status: str | None = Query(default="in_progress"),
+    exclude_personal: bool = Query(default=False),
+    scope: str = Query(default="my", pattern="^(my|company)$"),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
     user: dict = Depends(get_current_user),
@@ -125,6 +135,9 @@ def list_all_tasks(
         "assignee_id": assignee_id,
         "tag": tag,
         "followed": followed,
+        "project_status": project_status,
+        "exclude_personal": exclude_personal,
+        "scope": scope,
     }
     task_items, total = project_service.list_all_tasks_with_filters(
         db,

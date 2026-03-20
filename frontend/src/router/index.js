@@ -53,6 +53,12 @@ const routes = [
     meta: { title: "⭐ 关注项目", moduleKey: "project" },
   },
   {
+    path: "/projects/company-projects",
+    name: "project-company-projects",
+    component: ProjectListView,
+    meta: { title: "🏢 公司项目", moduleKey: "project" },
+  },
+  {
     path: "/projects/followed-tasks",
     name: "project-followed-tasks",
     component: ProjectTaskListView,
@@ -140,10 +146,16 @@ const routes = [
     meta: { title: "用户管理", moduleKey: "system" },
   },
   {
+    path: "/system/guide",
+    name: "system-guide",
+    component: PermissionInfoView,
+    meta: { title: "系统说明" },
+  },
+  {
     path: "/system/permissions",
     name: "system-permissions",
     component: PermissionInfoView,
-    meta: { title: "权限说明", moduleKey: "system" },
+    meta: { title: "系统说明", moduleKey: "system" },
   },
 ];
 
@@ -195,7 +207,7 @@ router.beforeEach(async (to) => {
 });
 
 router.afterEach((to) => {
-  document.title = `${to.meta.title || "ProjectTrace"} - ProjectTrace`;
+  document.title = "项管平台";
 });
 
 export default router;

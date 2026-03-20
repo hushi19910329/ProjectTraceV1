@@ -27,6 +27,7 @@ class ProjectCreate(BaseModel):
     description: str = ""
     status: str = "not_started"
     priority: str = "medium"
+    project_type: str = "work"
     owner_id: int
     start_date: str | None = None
     end_date: str | None = None
@@ -51,6 +52,7 @@ class ProjectUpdate(BaseModel):
     description: str | None = None
     status: str | None = None
     priority: str | None = None
+    project_type: str | None = None
     owner_id: int | None = None
     start_date: str | None = None
     end_date: str | None = None
@@ -125,6 +127,19 @@ class CommentCreate(BaseModel):
 class ReminderCreate(BaseModel):
     user_ids: list[int] = Field(min_length=1)
     content: str = Field(min_length=1, max_length=500)
+
+    @field_validator("content")
+    @classmethod
+    def strip_content(cls, value: str) -> str:
+        return value.strip()
+
+
+class TaskStatusUpdateCreate(BaseModel):
+    status: str
+    progress: int = Field(ge=0, le=100)
+    actual_hours: int = Field(default=0, ge=0)
+    content: str = Field(min_length=1, max_length=2000)
+    assignee_id: int | None = None
 
     @field_validator("content")
     @classmethod

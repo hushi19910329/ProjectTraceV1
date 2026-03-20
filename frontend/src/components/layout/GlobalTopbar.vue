@@ -23,6 +23,10 @@
     </div>
 
     <div class="topbar-right">
+      <el-button circle @click="goSystemGuide" title="系统说明">
+        <span class="help-icon">❓</span>
+      </el-button>
+
       <el-badge :value="unreadCount" :hidden="unreadCount === 0" class="notify-badge">
         <el-button circle @click="goNotifications">
           <el-icon><Bell /></el-icon>
@@ -44,6 +48,7 @@
       </el-dropdown>
     </div>
   </header>
+
 </template>
 
 <script setup>
@@ -94,6 +99,27 @@ function handleSearch() {
 
 function goNotifications() {
   router.push("/collaboration/messages");
+}
+
+function goSystemGuide() {
+  const sectionMap = {
+    dashboard: "module-dashboard",
+    project: "module-project",
+    requirement: "module-requirement",
+    task: "module-task",
+    test: "module-test",
+    collaboration: "module-collaboration",
+    "okr-report": "module-okr-report",
+    system: "module-system",
+  };
+  const moduleKey = String(route.meta.moduleKey || "");
+  router.push({
+    path: "/system/guide",
+    query: {
+      section: sectionMap[moduleKey] || "icons",
+      from: moduleKey || "unknown",
+    },
+  });
 }
 
 async function doLogout() {

@@ -57,6 +57,7 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(32), unique=True, nullable=False, index=True)
     real_name: Mapped[str] = mapped_column(String(32), nullable=False)
     mobile: Mapped[str] = mapped_column(String(20), unique=True, nullable=False, index=True)
+    avatar_url: Mapped[str] = mapped_column(String(500), default="", nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     status: Mapped[str] = mapped_column(String(16), default="active", nullable=False)
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)

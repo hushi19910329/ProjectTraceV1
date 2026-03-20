@@ -9,6 +9,7 @@
     </div>
 
     <el-table :data="users" border style="width: 100%;">
+      <el-table-column label="序号" width="80" type="index" />
       <el-table-column label="头像" width="86">
         <template #default="{ row }">
           <el-avatar :size="30" :src="row.avatar_url || ''">
