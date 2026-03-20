@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sprint 看板</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">ProjectTrace / Sprint 看板</div>
+    <div><a href="./01-index.html">页面导航</a></div>
+  </div>
+  <div class="layout">
+    <div class="sidebar">
+      <a class="active" href="./08-sprint-board.html">Sprint 看板</a>
+      <a href="./09-task-detail.html">任务详情</a>
+      <a href="./09-task-calendar.html">任务日历</a>
+      <a href="./11-timesheet-center.html">工时填报</a>
+    </div>
+    <div class="main">
+      <div class="page-title">
+        <h1>Sprint-3 看板</h1>
+        <div class="toolbar">
+          <span class="btn">新建任务</span>
+          <span class="btn btn-light">记录站会</span>
+          <span class="btn btn-light">关闭 Sprint</span>
+        </div>
+      </div>
+      <div class="grid grid-4">
+        <div class="card"><h3>Sprint 目标</h3><div>完成 CRM 订单模块联调并关闭关键缺陷</div></div>
+        <div class="card"><h3>周期</h3><div>03-18 ~ 03-31</div></div>
+        <div class="card"><h3>燃尽情况</h3><div>剩余 37 / 80 点</div></div>
+        <div class="card"><h3>WIP 提示</h3><div><span class="tag danger">开发中超限</span></div></div>
+      </div>
+      <div class="split" style="margin-top:16px;">
+        <div>
+          <div class="card">
+            <h3>每日站会摘要</h3>
+            <div class="timeline-item">昨天完成：订单列表接口联调</div>
+            <div class="timeline-item">今天计划：处理详情页性能问题</div>
+            <div class="timeline-item">阻塞项：测试环境 Redis 配置不稳定</div>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>看板</h3>
+            <div class="kanban">
+              <div class="kanban-col">
+                <h4>待处理</h4>
+                <div class="task-card"><a href="./09-task-detail.html">TASK-221 优化详情页接口</a><br /><span class="small muted">主任务 / 陈工</span></div>
+                <div class="task-card">TASK-225 调整缓存策略<br /><span class="small muted">技术线子任务 / 李工</span></div>
+              </div>
+              <div class="kanban-col">
+                <h4>进行中（WIP 5/4）</h4>
+                <div class="task-card">TASK-214 联调订单模块<br /><span class="small muted">子任务 / 赵工</span></div>
+                <div class="task-card">TASK-219 修复分页问题<br /><span class="small muted">技术线子任务 / 陈工</span></div>
+                <div class="task-card">TASK-223 改造前端请求层<br /><span class="small muted">技术线子任务 / 陈工</span></div>
+              </div>
+              <div class="kanban-col">
+                <h4>测试中</h4>
+                <div class="task-card">TASK-208 新建回归用例<br /><span class="small muted">子任务 / 张敏</span></div>
+                <div class="task-card">TASK-210 回归订单详情页<br /><span class="small muted">技术线子任务 / 张敏</span></div>
+              </div>
+              <div class="kanban-col">
+                <h4>已完成</h4>
+                <div class="task-card">TASK-201 登录态超时处理<br /><span class="small muted">技术线子任务 / 李工</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <h3>任务侧边详情</h3>
+            <div class="timeline-item">标题：TASK-221 优化详情页接口</div>
+            <div class="timeline-item">层级：主任务</div>
+            <div class="timeline-item">负责人：陈工</div>
+            <div class="timeline-item">子任务数：4</div>
+            <div class="timeline-item">技术线子任务数：7</div>
+            <div class="timeline-item">优先级：P0</div>
+            <div class="timeline-item">关联需求：REQ-031</div>
+            <div class="timeline-item">预计工时：8h</div>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>附件与素材提醒</h3>
+            <div class="timeline-item">已上传原型图 2 份</div>
+            <div class="timeline-item">缺少联调截图</div>
+            <div class="timeline-item">最新接口文档更新时间：03-20 14:20</div>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>迭代回顾行动项</h3>
+            <div class="timeline-item">减少“进行中”任务数</div>
+            <div class="timeline-item">接口联调前补齐 Mock 数据</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

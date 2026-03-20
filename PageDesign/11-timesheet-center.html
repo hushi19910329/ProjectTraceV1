@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>工时与日报中心</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">ProjectTrace / 工时与日报中心</div>
+    <div><a href="./01-index.html">页面导航</a></div>
+  </div>
+  <div class="layout">
+    <div class="sidebar">
+      <a class="active" href="./11-timesheet-center.html">工时日报</a>
+      <a href="./12-okr-center.html">OKR</a>
+      <a href="./14-report-center.html">报表</a>
+    </div>
+    <div class="main">
+      <div class="page-title">
+        <h1>工时、日报与资源负载</h1>
+        <div class="toolbar">
+          <span class="btn">填报工时</span>
+          <span class="btn btn-light">生成日报</span>
+          <span class="btn btn-light">查看周报</span>
+        </div>
+      </div>
+      <div class="split">
+        <div>
+          <div class="card">
+            <h3>工时填报</h3>
+            <table class="table">
+              <tr><th>日期</th><th>项目</th><th>任务</th><th>工时</th><th>说明</th></tr>
+              <tr><td>03-20</td><td>CRM 重构</td><td>TASK-221</td><td>4h</td><td>详情页接口优化</td></tr>
+              <tr><td>03-20</td><td>CRM 重构</td><td>TASK-223</td><td>3h</td><td>请求层改造</td></tr>
+            </table>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>我的日报</h3>
+            <div class="field" style="min-height:140px;">今天完成：订单详情页接口排查；正在进行：缓存方案改造；阻塞：测试环境配置不稳定；明日计划：接口联调与性能验证。</div>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <h3>团队工时统计</h3>
+            <div class="timeline-item">本周已填报 186h</div>
+            <div class="timeline-item">计划工时 220h</div>
+            <div class="timeline-item">填报完整率 91%</div>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>资源负载</h3>
+            <table class="table">
+              <tr><th>成员</th><th>当前负载</th><th>说明</th></tr>
+              <tr><td>陈工</td><td>120%</td><td>超负荷</td></tr>
+              <tr><td>张敏</td><td>110%</td><td>回归任务较多</td></tr>
+              <tr><td>李工</td><td>85%</td><td>正常</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

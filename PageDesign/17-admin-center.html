@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>组织与系统管理</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">ProjectTrace / 组织与系统管理</div>
+    <div><a href="./01-index.html">页面导航</a></div>
+  </div>
+  <div class="layout">
+    <div class="sidebar">
+      <a class="active" href="./17-admin-center.html">系统管理</a>
+      <a href="./04-project-list.html">项目中心</a>
+    </div>
+    <div class="main">
+      <div class="page-title">
+        <h1>组织与系统管理</h1>
+        <div class="toolbar">
+          <span class="btn">新增用户</span>
+          <span class="btn btn-light">新增部门</span>
+          <span class="btn btn-light">新增字段配置</span>
+        </div>
+      </div>
+      <div class="grid grid-2">
+        <div class="card">
+          <h3>用户与部门管理</h3>
+          <table class="table">
+            <tr><th>姓名</th><th>部门</th><th>岗位</th><th>状态</th></tr>
+            <tr><td>王强</td><td>研发一部</td><td>项目经理</td><td>在岗</td></tr>
+            <tr><td>张敏</td><td>测试组</td><td>测试工程师</td><td>在岗</td></tr>
+          </table>
+        </div>
+        <div class="card">
+          <h3>角色模板与范围配置</h3>
+          <div class="timeline-item">项目经理模板</div>
+          <div class="timeline-item">开发模板</div>
+          <div class="timeline-item">测试模板</div>
+          <div class="timeline-item">部门数据范围配置</div>
+        </div>
+        <div class="card">
+          <h3>自定义字段与状态流</h3>
+          <table class="table">
+            <tr><th>对象</th><th>字段/状态流</th><th>说明</th></tr>
+            <tr><td>需求</td><td>业务价值、故事点</td><td>可配置字段</td></tr>
+            <tr><td>任务</td><td>待处理 -> 进行中 -> 测试中 -> 已完成</td><td>状态流配置</td></tr>
+          </table>
+        </div>
+        <div class="card">
+          <h3>操作记录</h3>
+          <div class="timeline-item">03-20 09:00 新增用户：陈工</div>
+          <div class="timeline-item">03-20 11:20 修改需求状态流配置</div>
+          <div class="timeline-item">03-20 15:40 新增自定义字段：业务影响等级</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

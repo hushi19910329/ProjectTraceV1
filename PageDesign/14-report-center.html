@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>统计报表中心</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">ProjectTrace / 统计报表中心</div>
+    <div><a href="./01-index.html">页面导航</a></div>
+  </div>
+  <div class="layout">
+    <div class="sidebar">
+      <a class="active" href="./14-report-center.html">统计报表</a>
+      <a href="./12-okr-center.html">OKR</a>
+      <a href="./04-project-list.html">项目中心</a>
+    </div>
+    <div class="main">
+      <div class="page-title">
+        <h1>统计分析与透明度看板</h1>
+        <div class="toolbar">
+          <span class="btn btn-light">项目维度</span>
+          <span class="btn btn-light">部门维度</span>
+          <span class="btn">季度视图</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>筛选条件</h3>
+        <div class="form-grid">
+          <div><div class="small muted">时间范围</div><div class="field">本周 / 本月 / 本季度</div></div>
+          <div><div class="small muted">项目组</div><div class="field">全部项目组</div></div>
+          <div><div class="small muted">项目经理</div><div class="field">全部</div></div>
+          <div><div class="small muted">部门</div><div class="field">研发中心</div></div>
+        </div>
+      </div>
+      <div class="grid grid-4" style="margin-top:16px;">
+        <div class="card"><h3>项目健康度</h3><div style="font-size:28px;">81</div></div>
+        <div class="card"><h3>准时交付率</h3><div style="font-size:28px;">87%</div></div>
+        <div class="card"><h3>平均缺陷关闭时长</h3><div style="font-size:28px;">1.8 天</div></div>
+        <div class="card"><h3>透明度评分</h3><div style="font-size:28px;">79</div></div>
+      </div>
+      <div class="grid grid-2" style="margin-top:16px;">
+        <div class="card"><h3>需求趋势图占位</h3><div class="field" style="min-height:180px;">新增 / 完成 / 延期趋势</div></div>
+        <div class="card"><h3>任务效率图占位</h3><div class="field" style="min-height:180px;">燃尽图 / 吞吐量 / 周期时长</div></div>
+        <div class="card"><h3>缺陷质量图占位</h3><div class="field" style="min-height:180px;">新增关闭趋势 / 严重程度分布</div></div>
+        <div class="card"><h3>工时投入图占位</h3><div class="field" style="min-height:180px;">计划 vs 实际工时 / 部门分布</div></div>
+      </div>
+      <div class="card" style="margin-top:16px;">
+        <h3>透明度分析表</h3>
+        <table class="table">
+          <tr><th>项目</th><th>动态更新及时率</th><th>工时完整率</th><th>风险晾晒完整率</th><th>综合评分</th></tr>
+          <tr><td>CRM 重构</td><td>88%</td><td>91%</td><td>76%</td><td>84</td></tr>
+          <tr><td>数据中台</td><td>79%</td><td>85%</td><td>69%</td><td>77</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

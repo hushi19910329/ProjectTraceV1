@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>消息与待办中心</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">ProjectTrace / 消息与待办中心</div>
+    <div><a href="./01-index.html">页面导航</a></div>
+  </div>
+  <div class="layout">
+    <div class="sidebar">
+      <a class="active" href="./15-message-center.html">消息待办</a>
+      <a href="./03-dashboard.html">工作台</a>
+    </div>
+    <div class="main">
+      <div class="page-title">
+        <h1>消息、待办与订阅</h1>
+        <div class="toolbar">
+          <span class="btn btn-light">全部已读</span>
+          <span class="btn btn-light">订阅设置</span>
+        </div>
+      </div>
+      <div class="grid grid-3">
+        <div class="card">
+          <h3>待我处理</h3>
+          <div class="timeline-item">REQ-031 待评审</div>
+          <div class="timeline-item">BUG-1032 待确认修复</div>
+          <div class="timeline-item">Sprint-3 回顾记录待补充</div>
+        </div>
+        <div class="card">
+          <h3>抄送我的</h3>
+          <div class="timeline-item">CRM 重构里程碑延期提醒</div>
+          <div class="timeline-item">门户升级发布成功通知</div>
+        </div>
+        <div class="card">
+          <h3>@ 我的消息</h3>
+          <div class="timeline-item">@你：请补充回滚预案说明</div>
+          <div class="timeline-item">@你：REQ-031 需要补充测试场景</div>
+        </div>
+      </div>
+      <div class="split" style="margin-top:16px;">
+        <div class="card">
+          <h3>项目动态订阅</h3>
+          <table class="table">
+            <tr><th>项目</th><th>订阅内容</th><th>提醒方式</th></tr>
+            <tr><td>CRM 重构</td><td>风险、里程碑、严重缺陷</td><td>站内信</td></tr>
+            <tr><td>数据中台</td><td>需求变更、发布</td><td>站内信 / 企业微信</td></tr>
+          </table>
+        </div>
+        <div class="card">
+          <h3>关键提醒</h3>
+          <div class="timeline-item">03-21 10:00 Sprint 计划会</div>
+          <div class="timeline-item">03-21 18:00 工时填报截止</div>
+          <div class="timeline-item">03-28 20:00 v1.2.4 发布窗口</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

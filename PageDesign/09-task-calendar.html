@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>任务日历</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">ProjectTrace / 任务日历与时间线</div>
+    <div><a href="./08-sprint-board.html">返回 Sprint 看板</a></div>
+  </div>
+  <div class="layout">
+    <div class="sidebar">
+      <a href="./09-task-detail.html">任务详情</a>
+      <a href="./08-sprint-board.html">Sprint 看板</a>
+      <a class="active" href="./09-task-calendar.html">任务日历</a>
+    </div>
+    <div class="main">
+      <div class="page-title">
+        <h1>任务日历 / 甘特视图</h1>
+        <div class="toolbar">
+          <span class="btn btn-light">周视图</span>
+          <span class="btn">月视图</span>
+          <span class="btn btn-light">成员视图</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>时间线草图</h3>
+        <table class="table">
+          <tr><th>成员 / 任务</th><th>03-18</th><th>03-19</th><th>03-20</th><th>03-21</th><th>03-22</th></tr>
+          <tr><td>陈工 / <a href="./09-task-detail.html">TASK-221</a></td><td></td><td>开发</td><td>开发</td><td>联调</td><td>测试</td></tr>
+          <tr><td>张敏 / TASK-210</td><td></td><td></td><td>回归</td><td>回归</td><td></td></tr>
+          <tr><td>李工 / TASK-223</td><td>设计</td><td>开发</td><td>开发</td><td>开发</td><td>延期</td></tr>
+        </table>
+      </div>
+      <div class="split" style="margin-top:16px;">
+        <div class="card">
+          <h3>成员排期冲突</h3>
+          <div class="timeline-item">陈工：03-21 同时存在 3 条高优先级任务</div>
+          <div class="timeline-item">张敏：03-20 ~ 03-22 回归任务过于集中</div>
+        </div>
+        <div class="card">
+          <h3>延期任务</h3>
+          <div class="timeline-item">TASK-198 客户导入性能测试延期 2 天</div>
+          <div class="timeline-item">TASK-223 请求层改造延期 1 天</div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px;">
+        <h3>任务层级筛选</h3>
+        <div class="timeline-item">支持按主任务 / 子任务 / 技术线子任务筛选</div>
+        <div class="timeline-item">支持按执行人、Sprint、需求筛选</div>
+        <div class="timeline-item">支持识别同一主任务下的跨角色排期冲突</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

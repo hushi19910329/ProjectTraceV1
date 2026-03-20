@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>文档与知识库中心</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">ProjectTrace / 文档与知识库</div>
+    <div><a href="./01-index.html">页面导航</a></div>
+  </div>
+  <div class="layout">
+    <div class="sidebar">
+      <a class="active" href="./16-doc-center.html">文档中心</a>
+      <a href="./05-project-detail.html">项目详情</a>
+      <a href="./07-requirement-detail.html">需求详情</a>
+    </div>
+    <div class="main">
+      <div class="page-title">
+        <h1>文档与知识库中心</h1>
+        <div class="toolbar">
+          <span class="btn">新建文档</span>
+          <span class="btn btn-light">上传附件</span>
+          <span class="btn btn-light">新建目录</span>
+        </div>
+      </div>
+      <div class="split">
+        <div>
+          <div class="card">
+            <h3>文档目录与列表</h3>
+            <table class="table">
+              <tr><th>目录</th><th>文档</th><th>关联对象</th><th>更新时间</th></tr>
+              <tr><td>需求文档</td><td>订单性能优化 PRD</td><td>REQ-031</td><td>03-20</td></tr>
+              <tr><td>会议纪要</td><td>Sprint-3 回顾会议</td><td>Sprint-3</td><td>03-19</td></tr>
+              <tr><td>发布说明</td><td>v1.2.3 发布记录</td><td>v1.2.3</td><td>03-18</td></tr>
+            </table>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>文档预览区</h3>
+            <div class="field" style="min-height:260px;">这里显示文档正文预览、评论区、版本记录入口。</div>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <h3>关联对象</h3>
+            <div class="timeline-item">项目：CRM 重构</div>
+            <div class="timeline-item">需求：REQ-031</div>
+            <div class="timeline-item">版本：v1.2.4</div>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>知识沉淀入口</h3>
+            <div class="timeline-item">项目复盘</div>
+            <div class="timeline-item">常见问题库</div>
+            <div class="timeline-item">测试经验库</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

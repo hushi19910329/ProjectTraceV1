@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>工作台</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">ProjectTrace / 工作台</div>
+    <div><a href="./01-index.html">页面导航</a></div>
+  </div>
+  <div class="layout">
+    <div class="sidebar">
+      <h4>导航</h4>
+      <a class="active" href="./03-dashboard.html">工作台</a>
+      <a href="./04-project-list.html">项目中心</a>
+      <a href="./06-requirement-center.html">需求中心</a>
+      <a href="./08-sprint-board.html">Sprint 看板</a>
+      <a href="./10-test-bug-center.html">测试缺陷</a>
+      <a href="./11-timesheet-center.html">工时日报</a>
+      <a href="./12-okr-center.html">OKR</a>
+      <a href="./14-report-center.html">统计报表</a>
+    </div>
+    <div class="main">
+      <div class="page-title">
+        <h1>个人工作台</h1>
+        <div class="toolbar">
+          <span class="btn">新建项目</span>
+          <span class="btn">新建需求</span>
+          <span class="btn btn-light">全局搜索</span>
+        </div>
+      </div>
+      <div class="grid grid-4">
+        <div class="card"><h3>今日待办</h3><div style="font-size:28px;">12</div><div class="muted">其中逾期 3 条</div></div>
+        <div class="card"><h3>我负责的任务</h3><div style="font-size:28px;">18</div><div class="muted">进行中 8 条</div></div>
+        <div class="card"><h3>本周工时</h3><div style="font-size:28px;">31h</div><div class="muted">计划 40h</div></div>
+        <div class="card"><h3>OKR 进度</h3><div style="font-size:28px;">67%</div><div class="muted">2 个 KR 需关注</div></div>
+      </div>
+      <div class="split" style="margin-top:16px;">
+        <div>
+          <div class="card">
+            <h3>待我处理</h3>
+            <table class="table">
+              <tr><th>类型</th><th>标题</th><th>所属项目</th><th>截止时间</th><th>状态</th></tr>
+              <tr><td>需求</td><td>移动端报表导出优化</td><td>数据中台</td><td>03-21</td><td><span class="tag warn">待评审</span></td></tr>
+              <tr><td>任务</td><td>接口性能优化</td><td>CRM 重构</td><td>03-22</td><td><span class="tag">进行中</span></td></tr>
+              <tr><td>缺陷</td><td>登录后偶发白屏</td><td>门户升级</td><td>03-20</td><td><span class="tag danger">待回归</span></td></tr>
+            </table>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>项目动态</h3>
+            <div class="timeline-item">09:20 数据中台项目新增需求 2 条，进入待评审</div>
+            <div class="timeline-item">10:10 CRM 重构 Sprint-3 任务燃尽偏慢，出现 WIP 超限</div>
+            <div class="timeline-item">11:00 门户升级发布 v1.2.3，已进入上线验证</div>
+            <div class="timeline-item">14:30 测试团队提交严重缺陷 1 条</div>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <h3>风险提醒</h3>
+            <div class="timeline-item">门户升级里程碑延期 2 天</div>
+            <div class="timeline-item">CRM 重构测试通过率低于目标</div>
+            <div class="timeline-item">本周 2 名成员负载超过 120%</div>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>我的项目</h3>
+            <div class="timeline-item">数据中台 <span class="tag">进行中</span></div>
+            <div class="timeline-item">CRM 重构 <span class="tag warn">风险中</span></div>
+            <div class="timeline-item">门户升级 <span class="tag">上线中</span></div>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>最近访问</h3>
+            <div class="timeline-item">Sprint-3 看板</div>
+            <div class="timeline-item">需求 PRD-2026-031</div>
+            <div class="timeline-item">项目复盘文档</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

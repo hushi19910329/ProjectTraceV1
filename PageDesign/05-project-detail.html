@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>项目详情</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">ProjectTrace / 项目详情</div>
+    <div><a href="./04-project-list.html">返回项目中心</a></div>
+  </div>
+  <div class="layout">
+    <div class="sidebar">
+      <a class="active" href="./05-project-detail.html">项目概览</a>
+      <a href="./06-requirement-center.html">需求</a>
+      <a href="./09-task-detail.html">任务详情</a>
+      <a href="./08-sprint-board.html">Sprint</a>
+      <a href="./10-test-bug-center.html">测试缺陷</a>
+      <a href="./13-release-center.html">版本发布</a>
+      <a href="./16-doc-center.html">文档</a>
+    </div>
+    <div class="main">
+      <div class="page-title">
+        <h1>CRM 重构</h1>
+        <div class="toolbar">
+          <span class="btn">编辑项目</span>
+          <span class="btn btn-light">新增风险</span>
+          <span class="btn btn-light">新增周报</span>
+        </div>
+      </div>
+      <div class="grid grid-4">
+        <div class="card"><h3>项目进度</h3><div style="font-size:28px;">68%</div></div>
+        <div class="card"><h3>当前 Sprint</h3><div style="font-size:28px;">Sprint-3</div></div>
+        <div class="card"><h3>活跃缺陷</h3><div style="font-size:28px;">14</div></div>
+        <div class="card"><h3>里程碑风险</h3><div style="font-size:28px;">中</div></div>
+      </div>
+      <div class="split" style="margin-top:16px;">
+        <div>
+          <div class="card">
+            <h3>项目基本信息</h3>
+            <div class="form-grid">
+              <div><div class="small muted">项目经理</div><div class="field">王强</div></div>
+              <div><div class="small muted">项目周期</div><div class="field">2026-02-01 ~ 2026-05-30</div></div>
+              <div><div class="small muted">目标</div><div class="field">完成 CRM 系统核心模块重构并稳定上线</div></div>
+              <div><div class="small muted">关联 OKR</div><div class="field">O2-KR1、O2-KR2</div></div>
+            </div>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>里程碑与交付</h3>
+            <table class="table">
+              <tr><th>里程碑</th><th>计划时间</th><th>负责人</th><th>状态</th><th>说明</th></tr>
+              <tr><td>需求冻结</td><td>03-05</td><td>产品经理</td><td><span class="tag">已完成</span></td><td>按计划完成</td></tr>
+              <tr><td>联调完成</td><td>03-25</td><td>开发负责人</td><td><span class="tag warn">有风险</span></td><td>接口问题较多</td></tr>
+              <tr><td>预发布</td><td>04-02</td><td>测试负责人</td><td><span class="tag">未开始</span></td><td>等待前置完成</td></tr>
+            </table>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>项目动态时间线</h3>
+            <div class="timeline-item">03-20 09:00 Sprint-3 新增任务 4 条</div>
+            <div class="timeline-item">03-20 10:30 联调环境出现接口超时问题</div>
+            <div class="timeline-item">03-20 14:00 提交严重缺陷 BUG-1032</div>
+            <div class="timeline-item">03-20 16:00 同步迭代回顾行动项</div>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>任务层级概览</h3>
+            <ul class="tree">
+              <li>需求：订单详情页性能优化
+                <ul class="tree">
+                  <li>主任务：完成订单详情页优化改造</li>
+                  <li>子任务：方案设计 / 开发改造 / 联调验证 / 测试回归</li>
+                  <li>技术线子任务：前端缓存改造 / 后端接口优化 / SQL 优化 / 性能回归</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <h3>风险 / 问题 / 阻塞</h3>
+            <div class="timeline-item"><span class="tag danger">高</span> 订单接口超时影响联调</div>
+            <div class="timeline-item"><span class="tag warn">中</span> 测试资源不足</div>
+            <div class="timeline-item"><span class="tag warn">中</span> 任务进行中数量超出 WIP 限制</div>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>成员与资源</h3>
+            <table class="table">
+              <tr><th>成员</th><th>角色</th><th>本周负载</th></tr>
+              <tr><td>王强</td><td>项目经理</td><td>90%</td></tr>
+              <tr><td>陈工</td><td>开发</td><td>120%</td></tr>
+              <tr><td>张敏</td><td>测试</td><td>110%</td></tr>
+            </table>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>关联概览</h3>
+            <div class="timeline-item">需求 24 条</div>
+            <div class="timeline-item">主任务 18 条</div>
+            <div class="timeline-item">子任务 46 条</div>
+            <div class="timeline-item">技术线子任务 22 条</div>
+            <div class="timeline-item">缺陷 37 条</div>
+            <div class="timeline-item">版本 3 个</div>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>资料沉淀</h3>
+            <div class="timeline-item">原型图 8 份</div>
+            <div class="timeline-item">设计稿 5 份</div>
+            <div class="timeline-item">接口说明 12 份</div>
+            <div class="timeline-item">测试截图 19 份</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>版本与发布中心</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">ProjectTrace / 版本与发布中心</div>
+    <div><a href="./01-index.html">页面导航</a></div>
+  </div>
+  <div class="layout">
+    <div class="sidebar">
+      <a class="active" href="./13-release-center.html">版本发布</a>
+      <a href="./10-test-bug-center.html">测试缺陷</a>
+    </div>
+    <div class="main">
+      <div class="page-title">
+        <h1>版本与发布中心</h1>
+        <div class="toolbar">
+          <span class="btn">新建版本</span>
+          <span class="btn btn-light">发布检查单</span>
+          <span class="btn btn-light">新增发布记录</span>
+        </div>
+      </div>
+      <div class="split">
+        <div>
+          <div class="card">
+            <h3>版本列表</h3>
+            <table class="table">
+              <tr><th>版本</th><th>目标</th><th>计划发布时间</th><th>状态</th></tr>
+              <tr><td>v1.2.4</td><td>订单性能优化</td><td>03-28 20:00</td><td><span class="tag warn">准备中</span></td></tr>
+              <tr><td>v1.2.3</td><td>登录态修复</td><td>03-18 20:00</td><td><span class="tag">已发布</span></td></tr>
+            </table>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>发布检查项</h3>
+            <table class="table">
+              <tr><th>检查项</th><th>状态</th><th>说明</th></tr>
+              <tr><td>关联需求完成</td><td>已完成</td><td>REQ-031 已完成开发</td></tr>
+              <tr><td>高优缺陷关闭</td><td>进行中</td><td>BUG-1032 未关闭</td></tr>
+              <tr><td>回滚方案确认</td><td>已完成</td><td>已同步运维</td></tr>
+            </table>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <h3>发布窗口</h3>
+            <div class="timeline-item">环境：预发布 / 生产</div>
+            <div class="timeline-item">时间：03-28 20:00 ~ 22:00</div>
+            <div class="timeline-item">执行人：运维组 + 开发负责人</div>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>上线验证</h3>
+            <div class="timeline-item">首页登录验证</div>
+            <div class="timeline-item">订单详情页性能验证</div>
+            <div class="timeline-item">关键接口监控检查</div>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>发布记录</h3>
+            <div class="timeline-item">v1.2.3 发布成功，无回滚</div>
+            <div class="timeline-item">v1.2.2 发布后出现慢查询，已紧急修复</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

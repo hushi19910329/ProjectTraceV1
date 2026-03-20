@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>需求详情</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">ProjectTrace / 需求详情</div>
+    <div><a href="./06-requirement-center.html">返回需求中心</a></div>
+  </div>
+  <div class="layout">
+    <div class="sidebar">
+      <a class="active" href="./07-requirement-detail.html">需求详情</a>
+      <a href="./09-task-detail.html">关联任务</a>
+      <a href="./10-test-bug-center.html">关联测试缺陷</a>
+      <a href="./13-release-center.html">关联版本</a>
+    </div>
+    <div class="main">
+      <div class="page-title">
+        <h1>REQ-031 订单详情页加载优化</h1>
+        <div class="toolbar">
+          <span class="btn">编辑需求</span>
+          <span class="btn btn-light">发起评审</span>
+          <span class="btn btn-light">纳入 Sprint</span>
+        </div>
+      </div>
+      <div class="split">
+        <div>
+          <div class="card">
+            <h3>基本信息</h3>
+            <div class="form-grid">
+              <div><div class="small muted">来源</div><div class="field">客服反馈 / 线上性能问题</div></div>
+              <div><div class="small muted">优先级</div><div class="field">P0</div></div>
+              <div><div class="small muted">提出人</div><div class="field">李敏</div></div>
+              <div><div class="small muted">当前状态</div><div class="field">待评审</div></div>
+            </div>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>业务价值与描述</h3>
+            <div class="field" style="min-height:120px;">目标是将订单详情页首屏加载时间从 4.2s 降到 2s 以内，减少销售在客户现场演示时的等待时间，提升系统使用体验。</div>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>评审信息</h3>
+            <table class="table">
+              <tr><th>评审项</th><th>内容</th></tr>
+              <tr><td>结论</td><td>通过，纳入 Sprint-4</td></tr>
+              <tr><td>工时预估</td><td>前端 2 人日，后端 2 人日，测试 1 人日</td></tr>
+              <tr><td>风险</td><td>需要同步优化订单相关接口</td></tr>
+            </table>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>任务拆分设计</h3>
+            <table class="table">
+              <tr><th>层级</th><th>名称</th><th>负责人</th><th>状态</th></tr>
+              <tr><td>主任务</td><td><a href="./09-task-detail.html">完成订单详情页优化改造</a></td><td>王强</td><td><span class="tag">进行中</span></td></tr>
+              <tr><td>子任务</td><td>开发改造</td><td>陈工</td><td><span class="tag">进行中</span></td></tr>
+              <tr><td>技术线子任务</td><td>后端接口优化</td><td>李工</td><td><span class="tag warn">待联调</span></td></tr>
+            </table>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <h3>关联对象</h3>
+            <div class="timeline-item">任务：TASK-221、TASK-222</div>
+            <div class="timeline-item">测试用例：CASE-99</div>
+            <div class="timeline-item">缺陷：BUG-1032</div>
+            <div class="timeline-item">版本：v1.2.4</div>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>变更记录</h3>
+            <div class="timeline-item">03-19 增加接口缓存优化说明</div>
+            <div class="timeline-item">03-20 评审后调整故事点 3 -> 5</div>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>需求素材与附件</h3>
+            <div class="timeline-item">PRD：订单性能优化说明.docx</div>
+            <div class="timeline-item">原型图：详情页结构-v3.png</div>
+            <div class="timeline-item">流程图：性能链路分析.png</div>
+            <div class="timeline-item">外部链接：接口监控面板</div>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>评论与动态</h3>
+            <div class="timeline-item">@后端组：请补充接口瓶颈说明</div>
+            <div class="timeline-item">@测试组：需增加高并发场景用例</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

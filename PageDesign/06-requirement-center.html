@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>需求中心</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">ProjectTrace / 需求中心</div>
+    <div><a href="./01-index.html">页面导航</a></div>
+  </div>
+  <div class="layout">
+    <div class="sidebar">
+      <a class="active" href="./06-requirement-center.html">需求池</a>
+      <a href="./07-requirement-detail.html">需求详情</a>
+      <a href="./08-sprint-board.html">纳入 Sprint</a>
+    </div>
+    <div class="main">
+      <div class="page-title">
+        <h1>产品待办池 / Backlog</h1>
+        <div class="toolbar">
+          <span class="btn">新建需求</span>
+          <span class="btn btn-light">批量排期</span>
+          <span class="btn btn-light">安排评审</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="form-grid">
+          <div><div class="small muted">项目</div><div class="field">CRM 重构</div></div>
+          <div><div class="small muted">状态</div><div class="field">全部 / 待评审 / 待排期 / 开发中</div></div>
+          <div><div class="small muted">优先级</div><div class="field">P0 / P1 / P2 / P3</div></div>
+          <div><div class="small muted">标签</div><div class="field">客户需求 / 技术优化 / 合规</div></div>
+        </div>
+      </div>
+      <div class="grid grid-3" style="margin-top:16px;">
+        <div class="card">
+          <h3>高优先级待办</h3>
+          <div class="task-card">REQ-031 订单详情页加载优化</div>
+          <div class="task-card">REQ-032 客户标签筛选增强</div>
+          <div class="task-card">REQ-033 销售漏斗统计页</div>
+        </div>
+        <div class="card">
+          <h3>待评审</h3>
+          <div class="task-card">REQ-034 批量导入客户线索</div>
+          <div class="task-card">REQ-035 审计字段展示规范调整</div>
+        </div>
+        <div class="card">
+          <h3>待排期</h3>
+          <div class="task-card">REQ-028 移动端工作台优化</div>
+          <div class="task-card">REQ-029 日历视图导出</div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px;">
+        <h3>需求列表</h3>
+        <table class="table">
+          <tr><th>编号</th><th>标题</th><th>优先级</th><th>故事点</th><th>提出人</th><th>状态</th><th>目标版本</th></tr>
+          <tr><td><a href="./07-requirement-detail.html">REQ-031</a></td><td>订单详情页加载优化</td><td>P0</td><td>5</td><td>产品部</td><td><span class="tag warn">待评审</span></td><td>v1.2.4</td></tr>
+          <tr><td>REQ-028</td><td>移动端工作台优化</td><td>P1</td><td>8</td><td>运营部</td><td><span class="tag">待排期</span></td><td>v1.3.0</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

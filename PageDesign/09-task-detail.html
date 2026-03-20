@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>任务详情</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">ProjectTrace / 任务详情</div>
+    <div><a href="./01-index.html">页面导航</a></div>
+  </div>
+  <div class="layout">
+    <div class="sidebar">
+      <a href="./05-project-detail.html">项目详情</a>
+      <a href="./07-requirement-detail.html">需求详情</a>
+      <a class="active" href="./09-task-detail.html">任务详情</a>
+      <a href="./08-sprint-board.html">Sprint 看板</a>
+      <a href="./09-task-calendar.html">任务日历</a>
+    </div>
+    <div class="main">
+      <div class="page-title">
+        <h1>主任务：完成订单详情页优化改造</h1>
+        <div class="toolbar">
+          <span class="btn">新建子任务</span>
+          <span class="btn">新增技术线子任务</span>
+          <span class="btn btn-light">上传附件</span>
+          <span class="btn btn-light">指派执行人</span>
+        </div>
+      </div>
+      <div class="grid grid-4">
+        <div class="card"><h3>所属项目</h3><div>CRM 重构</div></div>
+        <div class="card"><h3>所属需求</h3><div>REQ-031</div></div>
+        <div class="card"><h3>负责人</h3><div>王强</div></div>
+        <div class="card"><h3>状态</h3><div><span class="tag">进行中</span></div></div>
+      </div>
+      <div class="split" style="margin-top:16px;">
+        <div>
+          <div class="card">
+            <h3>任务基本信息</h3>
+            <div class="form-grid">
+              <div><div class="small muted">任务层级</div><div class="field">主任务</div></div>
+              <div><div class="small muted">优先级</div><div class="field">P0</div></div>
+              <div><div class="small muted">计划时间</div><div class="field">03-18 ~ 03-27</div></div>
+              <div><div class="small muted">预估工时</div><div class="field">24h</div></div>
+              <div><div class="small muted">协作人</div><div class="field">陈工 / 李工 / 张敏</div></div>
+              <div><div class="small muted">完成标准</div><div class="field">接口响应时间降到 2s 内并完成回归</div></div>
+            </div>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>任务树</h3>
+            <ul class="tree">
+              <li>主任务：完成订单详情页优化改造
+                <ul class="tree">
+                  <li>子任务：方案设计
+                    <ul class="tree">
+                      <li>技术线子任务：前端方案评估</li>
+                      <li>技术线子任务：后端接口瓶颈分析</li>
+                    </ul>
+                  </li>
+                  <li>子任务：开发改造
+                    <ul class="tree">
+                      <li>技术线子任务：前端缓存改造</li>
+                      <li>技术线子任务：后端接口优化</li>
+                      <li>技术线子任务：SQL 查询优化</li>
+                    </ul>
+                  </li>
+                  <li>子任务：测试回归
+                    <ul class="tree">
+                      <li>技术线子任务：功能回归</li>
+                      <li>技术线子任务：性能回归</li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>子任务与技术线子任务列表</h3>
+            <table class="table">
+              <tr><th>层级</th><th>名称</th><th>执行人</th><th>计划时间</th><th>状态</th></tr>
+              <tr><td>子任务</td><td>开发改造</td><td>陈工</td><td>03-19 ~ 03-24</td><td><span class="tag">进行中</span></td></tr>
+              <tr><td>技术线子任务</td><td>前端缓存改造</td><td>陈工</td><td>03-19 ~ 03-21</td><td><span class="tag">进行中</span></td></tr>
+              <tr><td>技术线子任务</td><td>后端接口优化</td><td>李工</td><td>03-19 ~ 03-22</td><td><span class="tag warn">待联调</span></td></tr>
+              <tr><td>技术线子任务</td><td>性能回归</td><td>张敏</td><td>03-24 ~ 03-25</td><td><span class="tag">待开始</span></td></tr>
+            </table>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <h3>附件与素材</h3>
+            <div class="timeline-item">图片：详情页原型-v3.png</div>
+            <div class="timeline-item">截图：接口监控-03-20.png</div>
+            <div class="timeline-item">文档：性能优化方案.docx</div>
+            <div class="timeline-item">附件：慢 SQL 清单.xlsx</div>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>工时记录</h3>
+            <div class="timeline-item">陈工：4h，完成前端缓存逻辑改造</div>
+            <div class="timeline-item">李工：3h，完成接口索引排查</div>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>评论与动态</h3>
+            <div class="timeline-item">@张敏：请明天安排性能回归</div>
+            <div class="timeline-item">03-20 11:00 任务状态更新为进行中</div>
+            <div class="timeline-item">03-20 15:30 上传了新的接口监控截图</div>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3>操作记录</h3>
+            <div class="timeline-item">王强创建主任务</div>
+            <div class="timeline-item">陈工新增技术线子任务：前端缓存改造</div>
+            <div class="timeline-item">李工被指派到后端接口优化</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
